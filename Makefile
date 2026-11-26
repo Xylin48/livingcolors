@@ -14,9 +14,12 @@ build/test_world: $(CORE) src/world.h src/interaction.h tests/test_world.c | bui
 
 build/test_interaction: $(CORE) src/world.h src/interaction.h tests/test_interaction.c | build
 	$(CC) $(CFLAGS) -Isrc $(CORE) tests/test_interaction.c -o $@ $(LDLIBS)
-test: build/test_world build/test_interaction
+build/test_manipulation: $(CORE) src/world.h src/interaction.h tests/test_manipulation.c | build
+	$(CC) $(CFLAGS) -Isrc $(CORE) tests/test_manipulation.c -o $@ $(LDLIBS)
+test: build/test_world build/test_interaction build/test_manipulation
 	./build/test_world
 	./build/test_interaction
+	./build/test_manipulation
 
 # Optional desktop viewer; requires raylib from pkg-config.
 viewer: | build

@@ -8,7 +8,15 @@
 /* Format is intentionally human-readable and uses stable object IDs, not array offsets.
  * Only mutable fields are stored. Geometry comes from the current world definition. */
 bool lc_save(const LCWorld *world, const char *path) {
-    if (!world || !path || !*path || strlen(path)>4000) return false;
+    if (!world || !path || !*path || strlen(path)>4000 ||
+        world->object_count>LC_MAX_OBJECTS||world->count>LC_MAX_SOLIDS||
+        lc_blocked(world,world->player.position)) return false;
+    if(world->held_object_id){
+        bool valid=false;
+        for(size_t i=0;i<world->object_count;i++)
+            if(world->objects[i].id==world->held_object_id&&(world->objects[i].flags&LC_OBJ_MOVABLE))valid=true;
+        if(!valid)return false;
+    }
     size_t n=strlen(path);
     char *tmp=malloc(n+5);
     if(!tmp)return false;
@@ -16,10 +24,10 @@ bool lc_save(const LCWorld *world, const char *path) {
     memcpy(tmp+n,".tmp",5);
     FILE *f=fopen(tmp,"w");
     if(!f){free(tmp);return false;}
-    int good=fprintf(f,"LIVINGCOLORS 1\n%a %a %a %a %a\n%zu\n",
+    int good=fprintf(f,"LIVINGCOLORS 2\n%a %a %a %a %a\n%u\n%zu\n",
        (double)world->player.position.x,(double)world->player.position.y,
        (double)world->player.position.z,(double)world->player.yaw,
-       (double)world->player.pitch,world->object_count)>0;
+       (double)world->player.pitch,world->held_object_id,world->object_count)>0;
     for(size_t i=0;i<world->object_count && good;i++) {
         const LCObject *o=&world->objects[i];
         good=fprintf(f,"%u %u %u %a %a %a %a %a %a\n",
@@ -37,12 +45,12 @@ bool lc_save(const LCWorld *world, const char *path) {
 }
 
 bool lc_load(LCWorld *world, const char *path) {
-    if(!world || !path)return false;
+    if(!world || !path || world->object_count>LC_MAX_OBJECTS || world->count>LC_MAX_SOLIDS)return false;
     FILE *f=fopen(path,"r");if(!f)return false;
     LCWorld staged=*world;
     unsigned format;
     char magic[24]={0};
-    if(fscanf(f,"%23s %u",magic,&format)!=2 || strcmp(magic,"LIVINGCOLORS")!=0 || format!=1)
+    if(fscanf(f,"%23s %u",magic,&format)!=2 || strcmp(magic,"LIVINGCOLORS")!=0 || (format!=1 && format!=2))
         goto invalid;
     if(fscanf(f,"%f %f %f %f %f",&staged.player.position.x,
         &staged.player.position.y,&staged.player.position.z,
@@ -50,8 +58,12 @@ bool lc_load(LCWorld *world, const char *path) {
     if(!isfinite(staged.player.yaw)||!isfinite(staged.player.pitch)||
        fabsf(staged.player.pitch)>1.57f)
         goto invalid;
+    staged.held_object_id=0;
+    if(format==2 && fscanf(f,"%u",&staged.held_object_id)!=1)goto invalid;
     size_t count=0;
-    if(fscanf(f,"%zu",&count)!=1 || count!=staged.object_count)goto invalid;
+    /* Older snapshots may predate additive object definitions. Retain defaults for
+     * new IDs; unknown and duplicate IDs still fail. */
+    if(fscanf(f,"%zu",&count)!=1 || count>staged.object_count)goto invalid;
     bool seen[LC_MAX_OBJECTS]={0};
     for(size_t i=0;i<count;i++) {
         unsigned id,flags,progress;
@@ -76,12 +88,26 @@ bool lc_load(LCWorld *world, const char *path) {
            (o->kind!=LC_DEVICE && (flags&LC_OBJ_POWERED)))goto invalid;
         if(!(o->flags&LC_OBJ_MOVABLE) && memcmp(&b,&o->shape,sizeof(b))!=0)
             goto invalid;
+        if(o->flags&LC_OBJ_MOVABLE){
+            if(fabsf((b.max.x-b.min.x)-(o->shape.max.x-o->shape.min.x))>.0001f||
+               fabsf((b.max.y-b.min.y)-(o->shape.max.y-o->shape.min.y))>.0001f||
+               fabsf((b.max.z-b.min.z)-(o->shape.max.z-o->shape.min.z))>.0001f)goto invalid;
+        }
         o->shape=b; o->flags=flags; o->progress=progress;
         seen[ix]=true;
     }
     char ending[8]={0},excess[2]={0};
     if(fscanf(f,"%7s",ending)!=1||strcmp(ending,"END")!=0||
        fscanf(f,"%1s",excess)==1)goto invalid;
+    if(staged.held_object_id){
+        LCObject *o=lc_find_object(&staged,staged.held_object_id);
+        if(!o||!(o->flags&LC_OBJ_MOVABLE)||!seen[(size_t)(o-staged.objects)])goto invalid;
+    }
+    for(size_t i=0;i<staged.object_count;i++){
+        const LCObject *o=&staged.objects[i];
+        if(o->id!=staged.held_object_id&&(o->flags&LC_OBJ_MOVABLE)&&
+           !lc_placement_clear(&staged,o->id,o->shape,false))goto invalid;
+    }
     /* Validate player against restored dynamic colliders, not stale states. */
     if(lc_blocked(&staged,staged.player.position) ||
        fabsf(lc_floor_height(staged.player.position.x,staged.player.position.z,

@@ -36,8 +36,13 @@ bool lc_cast(const LCWorld *w,LCVec o,LCVec d,float limit,LCHit *out) {
     for(size_t i=0;i<w->count;i++){
         if(intersect(w->solids[i].shape,o,d,best,&t)){best=t;found=true;}
     }
+    for(size_t i=0;i<LC_STAIR_TREADS;i++){
+        LCBox tread;
+        if(lc_stair_tread(i,&tread)&&intersect(tread,o,d,best,&t)){best=t;found=true;}
+    }
     for(size_t i=0;i<w->object_count;i++){
         const LCObject *obj=&w->objects[i];
+        if(obj->id==w->held_object_id)continue;
         if(intersect(lc_object_shape(obj),o,d,best,&t)&&(!found||t<best)){
             best=t;id=obj->id;found=true;
         }
@@ -56,11 +61,62 @@ bool lc_look(LCWorld *w,float dyaw,float dpitch){
     w->player.pitch=fmaxf(-1.4f,fminf(1.4f,w->player.pitch+dpitch));
     return true;
 }
+static bool on_top(LCBox b,LCVec p) {
+    return fabsf(p.y-b.max.y)<.001f&&p.x>=b.min.x&&p.x<=b.max.x&&
+           p.z>=b.min.z&&p.z<=b.max.z;
+}
+static bool supported(LCBox support,LCBox item) {
+    return item.min.x>=support.min.x&&item.max.x<=support.max.x&&
+           item.min.z>=support.min.z&&item.max.z<=support.max.z;
+}
+bool lc_place_held(LCWorld *w) {
+    if(!w||!w->held_object_id||lc_blocked(w,w->player.position))return false;
+    LCObject *o=lc_find_object(w,w->held_object_id);
+    LCHit h;
+    if(!o||!(o->flags&LC_OBJ_MOVABLE)||lc_view_direction(&w->player).y>=-.001f||
+       !lc_focus(w,1.5f,&h))return false;
+    LCBox support={0};
+    bool found=false;
+    if(h.object_id){
+        LCObject *s=lc_find_object(w,h.object_id);
+        if(s&&(s->flags&LC_OBJ_SOLID)&&s->kind!=LC_DOOR){
+            support=lc_object_shape(s);found=on_top(support,h.point);
+        }
+    }else{
+        for(size_t i=0;i<w->count;i++){
+            LCBox b=w->solids[i].shape;
+            if(on_top(b,h.point)){support=b;found=true;break;}
+        }
+    }
+    if(!found)return false;
+    LCVec size={o->shape.max.x-o->shape.min.x,o->shape.max.y-o->shape.min.y,
+                o->shape.max.z-o->shape.min.z};
+    LCBox a={{h.point.x-size.x*.5f,support.max.y,h.point.z-size.z*.5f},
+             {h.point.x+size.x*.5f,support.max.y+size.y,h.point.z+size.z*.5f}};
+    if(!supported(support,a)||!lc_placement_clear(w,o->id,a,true))return false;
+    o->shape=a;
+    w->held_object_id=0;
+    return true;
+}
 bool lc_use(LCWorld *w,uint32_t id,LCAction action){
+    if(action==LC_ACTION_PLACE)return w&&id&&id==w->held_object_id&&lc_place_held(w);
     LCHit hit;
     if(!w||!id||lc_blocked(w,w->player.position)||!lc_focus(w,1.5f,&hit)||hit.object_id!=id)return false;
     LCObject *o=lc_find_object(w,id);
-    if(!o||!(o->flags&LC_OBJ_INTERACTIVE))return false;
+    if(!o)return false;
+    if(action==LC_ACTION_PICK_UP){
+        if(w->held_object_id||!(o->flags&LC_OBJ_MOVABLE))return false;
+        /* A solid item supporting other objects cannot be removed from under them. */
+        for(size_t i=0;i<w->object_count;i++){
+            const LCObject *s=&w->objects[i];
+            if(s->id!=id&&fabsf(s->shape.min.y-o->shape.max.y)<.001f&&
+               s->shape.min.x<o->shape.max.x&&s->shape.max.x>o->shape.min.x&&
+               s->shape.min.z<o->shape.max.z&&s->shape.max.z>o->shape.min.z)return false;
+        }
+        w->held_object_id=id;
+        return true;
+    }
+    if(!(o->flags&LC_OBJ_INTERACTIVE))return false;
     if(action==LC_ACTION_TOGGLE)
         return lc_toggle_object(w,id,w->player.position);
     if(action==LC_ACTION_READ_NEXT && o->kind==LC_BOOK && o->progress<UINT32_MAX){

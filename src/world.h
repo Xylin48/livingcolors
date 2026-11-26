@@ -13,6 +13,7 @@
 #define LC_UPSTAIRS_Y 3.0f
 #define LC_PLAYER_RADIUS .24f
 #define LC_PLAYER_HEIGHT 1.52f
+#define LC_STAIR_TREADS 17u
 
 typedef struct { float x, y, z; } LCVec;
 typedef struct { LCVec min, max; } LCBox;
@@ -49,12 +50,17 @@ typedef struct {
     LCObject objects[LC_MAX_OBJECTS];
     size_t object_count;
     LCPose player;
+    uint32_t held_object_id; /* zero or one existing movable object; no duplicate inventory */
 } LCWorld;
 
 bool lc_add_wall(LCWorld *world, LCBox shape, LCColor color);
 bool lc_add_box(LCWorld *world, LCBox shape); /* compatibility helper */
 bool lc_add_object(LCWorld *world, LCObject object);
 LCBox lc_object_shape(const LCObject *object);
+/* Walking uses a continuous stair profile; rendering and rays share these tread boxes. */
+bool lc_stair_tread(size_t index, LCBox *shape);
+/* Validates a proposed box against architecture and other objects, without mutation. */
+bool lc_placement_clear(const LCWorld *world, uint32_t id, LCBox shape, bool all_objects);
 bool lc_blocked(const LCWorld *world, LCVec feet);
 float lc_floor_height(float x, float z, float current_y);
 bool lc_move(const LCWorld *world, LCPose *pose, float dx, float dz, float dt);

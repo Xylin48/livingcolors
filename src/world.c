@@ -37,7 +37,7 @@ bool lc_add_object(LCWorld *w, LCObject o) {
     return true;
 }
 LCObject *lc_find_object(LCWorld *w,uint32_t id) {
-    if(!w)return NULL;
+    if(!w||w->object_count>LC_MAX_OBJECTS)return NULL;
     for(size_t i=0;i<w->object_count;i++) if(w->objects[i].id==id)return &w->objects[i];
     return NULL;
 }
@@ -56,6 +56,22 @@ LCBox lc_object_shape(const LCObject *o) {
     }
     return b;
 }
+bool lc_stair_tread(size_t i, LCBox *out) {
+    if (!out || i>=LC_STAIR_TREADS) return false;
+    const float start=9.55f,end=4.70f;
+    if (i==LC_STAIR_TREADS-1) {
+        *out=box(10.28f,0,4.45f,11.72f,LC_UPSTAIRS_Y,end);
+    } else {
+        const float n=(float)(LC_STAIR_TREADS-1);
+        *out=box(10.28f,0,start-(start-end)*(i+1)/n,
+                 11.72f,LC_UPSTAIRS_Y*(i+1)/n,start-(start-end)*i/n);
+    }
+    return true;
+}
+static bool boxes_overlap(LCBox a,LCBox b) {
+    return a.min.x<b.max.x&&a.max.x>b.min.x&&a.min.y<b.max.y&&a.max.y>b.min.y&&
+           a.min.z<b.max.z&&a.max.z>b.min.z;
+}
 static bool overlaps(LCBox b,LCVec feet) {
     const float r=LC_PLAYER_RADIUS;
     return feet.x+r>b.min.x && feet.x-r<b.max.x &&
@@ -63,14 +79,14 @@ static bool overlaps(LCBox b,LCVec feet) {
         feet.z+r>b.min.z && feet.z-r<b.max.z;
 }
 bool lc_blocked(const LCWorld *w, LCVec p) {
-    if(!w || !finite_vec(p) || p.x<LC_PLAYER_RADIUS ||
+    if(!w || w->count>LC_MAX_SOLIDS || w->object_count>LC_MAX_OBJECTS || !finite_vec(p) || p.x<LC_PLAYER_RADIUS ||
        p.z<LC_PLAYER_RADIUS || p.x>LC_WORLD_WIDTH-LC_PLAYER_RADIUS ||
        p.z>LC_WORLD_DEPTH-LC_PLAYER_RADIUS || p.y<-.01f || p.y>LC_UPSTAIRS_Y+.01f)
         return true;
     for(size_t i=0;i<w->count;i++) if(overlaps(w->solids[i].shape,p)) return true;
     for(size_t i=0;i<w->object_count;i++) {
         const LCObject *o=&w->objects[i];
-        if((o->flags&LC_OBJ_SOLID) && overlaps(lc_object_shape(o),p)) return true;
+        if(o->id!=w->held_object_id && (o->flags&LC_OBJ_SOLID) && overlaps(lc_object_shape(o),p)) return true;
     }
     return false;
 }
@@ -117,7 +133,7 @@ static bool nearby(LCVec a, LCBox b, float distance) {
 }
 bool lc_toggle_object(LCWorld *w,uint32_t id,LCVec from) {
     LCObject *o=lc_find_object(w,id);
-    if(!o||!finite_vec(from)||!(o->flags&LC_OBJ_INTERACTIVE)||
+    if(!o||id==w->held_object_id||!finite_vec(from)||!(o->flags&LC_OBJ_INTERACTIVE)||
        !nearby(from,lc_object_shape(o),1.5f))return false;
     if(o->kind==LC_DOOR) {
         LCObject next=*o; next.flags^=LC_OBJ_OPEN;
@@ -130,32 +146,37 @@ bool lc_toggle_object(LCWorld *w,uint32_t id,LCVec from) {
     else return false;
     return true;
 }
+bool lc_placement_clear(const LCWorld *w,uint32_t id,LCBox a,bool all_objects) {
+    if(!w||!id||w->count>LC_MAX_SOLIDS||w->object_count>LC_MAX_OBJECTS||!valid_box(a)||
+       a.min.x<0||a.min.y<0||a.min.z<0||a.max.x>LC_WORLD_WIDTH||
+       a.max.y>LC_UPSTAIRS_Y+3||a.max.z>LC_WORLD_DEPTH)return false;
+    const LCObject *item=NULL;
+    for(size_t i=0;i<w->object_count;i++)if(w->objects[i].id==id)item=&w->objects[i];
+    if(!item||!(item->flags&LC_OBJ_MOVABLE))return false;
+    if((item->flags&LC_OBJ_SOLID)&&overlaps(a,w->player.position))return false;
+    for(size_t i=0;i<w->count;i++)if(boxes_overlap(a,w->solids[i].shape))return false;
+    for(size_t i=0;i<LC_STAIR_TREADS;i++){
+        LCBox tread;
+        if(lc_stair_tread(i,&tread)&&boxes_overlap(a,tread))return false;
+    }
+    for(size_t i=0;i<w->object_count;i++){
+        const LCObject *o=&w->objects[i];
+        if(o->id==id||o->id==w->held_object_id||(!all_objects&&!(o->flags&LC_OBJ_SOLID)))continue;
+        if(boxes_overlap(a,lc_object_shape(o)))return false;
+    }
+    return true;
+}
 bool lc_move_object(LCWorld *w,uint32_t id,LCVec from,LCVec target) {
     LCObject *o=lc_find_object(w,id);
-    if(!o||!finite_vec(from)||!finite_vec(target)||!(o->flags&LC_OBJ_MOVABLE)||
-       !nearby(from,o->shape,1.5f) || hypotf(target.x-from.x,target.z-from.z)>1.6f ||
-       target.x<0||target.z<0||target.x>LC_WORLD_WIDTH||target.z>LC_WORLD_DEPTH ||
-       target.y<0||target.y>LC_UPSTAIRS_Y+2)return false;
-    LCBox before=o->shape;
-    LCVec delta={target.x-before.min.x,target.y-before.min.y,target.z-before.min.z};
-    o->shape.min=target;
-    o->shape.max=(LCVec){before.max.x+delta.x,before.max.y+delta.y,before.max.z+delta.z};
-    if(!valid_box(o->shape) || o->shape.max.x>LC_WORLD_WIDTH ||
-       o->shape.max.z>LC_WORLD_DEPTH ||
-       ((o->flags&LC_OBJ_SOLID) && overlaps(o->shape,w->player.position))) {
-        o->shape=before;return false;
-    }
-    for(size_t i=0;i<w->count;i++) {
-        LCBox b=w->solids[i].shape,a=o->shape;
-        if(a.min.x<b.max.x && a.max.x>b.min.x && a.min.y<b.max.y && a.max.y>b.min.y &&
-           a.min.z<b.max.z && a.max.z>b.min.z) {o->shape=before;return false;}
-    }
-    for(size_t i=0;i<w->object_count;i++) {
-        LCObject *other=&w->objects[i]; LCBox a=o->shape,b=lc_object_shape(other);
-        if(other==o||!(other->flags&LC_OBJ_SOLID))continue;
-        if(a.min.x<b.max.x&&a.max.x>b.min.x&&a.min.y<b.max.y&&a.max.y>b.min.y&&
-           a.min.z<b.max.z&&a.max.z>b.min.z){o->shape=before;return false;}
-    }
+    if(!o||id==w->held_object_id||!finite_vec(from)||!finite_vec(target)||
+       !(o->flags&LC_OBJ_MOVABLE)||!nearby(from,o->shape,1.5f)||
+       hypotf(target.x-from.x,target.z-from.z)>1.6f||
+       target.y>LC_UPSTAIRS_Y+2)return false;
+    LCBox a={target,{target.x+(o->shape.max.x-o->shape.min.x),
+                     target.y+(o->shape.max.y-o->shape.min.y),
+                     target.z+(o->shape.max.z-o->shape.min.z)}};
+    if(!lc_placement_clear(w,id,a,false))return false;
+    o->shape=a;
     return true;
 }
 void lc_house(LCWorld *w) {
@@ -163,6 +184,8 @@ void lc_house(LCWorld *w) {
     *w=(LCWorld){0};
     const LCColor cream={216,198,165}, wallblue={158,173,177}, tile={185,192,184};
     const LCColor wood={118,75,43},dark={70,64,59},cloth={100,104,121},metal={103,112,120};
+    /* Physical ground surface, shared with ray casting and rendering. */
+    wall(w,0,-.12f,0,12,0,10,(LCColor){125,102,78});
     /* All dimensions provisional: 12x10m exterior. Two stacked storeys, not a ranch. */
     wall(w,0,0,0,.13f,2.82f,10,cream);wall(w,11.87f,0,0,12,2.82f,10,cream);
     wall(w,0,0,0,6.2f,2.82f,.13f,cream);wall(w,7.2f,0,0,12,2.82f,.13f,cream);

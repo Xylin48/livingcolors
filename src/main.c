@@ -23,23 +23,18 @@ static void draw_box(LCBox b,Color c) {
     DrawCubeWiresV(center(b),extent(b),ColorBrightness(c,-.30f));
 }
 static void draw_staircase(void) {
-    const int steps=16;
-    const float z_start=9.55f,z_end=4.70f;
-    for(int i=0;i<steps;i++) {
-        const float t=(float)(i+1)/steps;
-        const float z0=z_start-(z_start-z_end)*(i+1)/steps;
-        const float z1=z_start-(z_start-z_end)*i/steps;
-        LCBox step={{10.28f,0,z0},{11.72f,LC_UPSTAIRS_Y*t,z1}};
-        draw_box(step,(Color){119,78,46,255});
+    /* The same treads are used by the virtual sight ray. */
+    for(size_t i=0;i<LC_STAIR_TREADS;i++){
+        LCBox step;
+        if(lc_stair_tread(i,&step))draw_box(step,(Color){119,78,46,255});
     }
-    draw_box((LCBox){{10.28f,0,4.45f},{11.72f,LC_UPSTAIRS_Y,4.70f}},(Color){119,78,46,255});
 }
 static void draw_scene(const LCWorld *w) {
-    DrawPlane((Vector3){6,0,5},(Vector2){12,10},(Color){125,102,78,255});
     draw_staircase();
     for(size_t i=0;i<w->count;i++) draw_box(w->solids[i].shape,color(w->solids[i].color));
     for(size_t i=0;i<w->object_count;i++) {
         const LCObject *o=&w->objects[i];
+        if(o->id==w->held_object_id)continue;
         Color c=color(o->color);
         if(o->kind==LC_DEVICE && (o->flags&LC_OBJ_POWERED))c=(Color){73,132,126,255};
         draw_box(lc_object_shape(o),c);
@@ -70,6 +65,12 @@ int main(void) {
                 if(lc_use(&w,hit.object_id,action))
                     printf("Interacted with object %u\n",hit.object_id);
             }
+        }
+        if(IsKeyPressed(KEY_G)){
+            LCHit hit;
+            bool done=w.held_object_id?lc_place_held(&w):
+                (lc_focus(&w,1.5f,&hit)&&hit.object_id&&lc_use(&w,hit.object_id,LC_ACTION_PICK_UP));
+            if(done)puts(w.held_object_id?"Picked up object":"Placed object");
         }
         if(IsKeyPressed(KEY_F5))printf("Save: %s\n",lc_save(&w,"livingcolors.save")?"OK":"FAILED");
         if(IsKeyPressed(KEY_F9))printf("Load: %s\n",lc_load(&w,"livingcolors.save")?"OK":"FAILED");
