@@ -1,4 +1,5 @@
 #include "command.h"
+#include "body.h"
 
 #include <math.h>
 
@@ -27,16 +28,19 @@ LCCommandStatus lc_execute(LCWorld *w,const LCCommand *cmd,LCCommandReceipt *out
         }
     }
     if(!w||!cmd||cmd->api_version!=LC_COMMAND_API_VERSION||
-       lc_blocked(w,w->player.position)||!isfinite(w->player.yaw)||
-       !isfinite(w->player.pitch)){
+       !lc_body_valid(w)){
         *out=r;return r.status;
     }
     r.before_pose=r.after_pose=w->player;
     r.before_held_id=r.after_held_id=w->held_object_id;
+    r.before_posture=r.after_posture=w->posture;
+    r.before_support_id=r.after_support_id=w->support_id;
     switch(cmd->kind){
     case LC_COMMAND_WALK:{
         const float f=cmd->input.walk.forward,side=cmd->input.walk.right,dt=cmd->input.walk.seconds;
         if(!isfinite(f)||!isfinite(side)||!isfinite(dt)||fabsf(f)>1||fabsf(side)>1||dt<0||dt>1)break;
+        if(dt==0||(f==0&&side==0)){r.status=LC_COMMAND_UNCHANGED;break;}
+        if(w->posture!=LC_STANDING){r.status=LC_COMMAND_REJECTED;break;}
         const float yaw=w->player.yaw;
         const float dx=side*cosf(yaw)+f*sinf(yaw);
         const float dz=side*sinf(yaw)-f*cosf(yaw);
@@ -54,7 +58,8 @@ LCCommandStatus lc_execute(LCWorld *w,const LCCommand *cmd,LCCommandReceipt *out
     case LC_COMMAND_USE:{
         const uint32_t id=cmd->input.use.object_id;
         const LCAction a=cmd->input.use.action;
-        if(!id||(a!=LC_ACTION_TOGGLE&&a!=LC_ACTION_READ_NEXT&&a!=LC_ACTION_PICK_UP&&a!=LC_ACTION_PLACE))break;
+        if(!id||(a!=LC_ACTION_TOGGLE&&a!=LC_ACTION_READ_NEXT&&a!=LC_ACTION_PICK_UP&&a!=LC_ACTION_PLACE&&
+                 a!=LC_ACTION_SIT&&a!=LC_ACTION_REST&&a!=LC_ACTION_STAND))break;
         LCObject *o=lc_find_object(w,id);
         if(!o){r.status=LC_COMMAND_REJECTED;break;}
         const LCObjectState before=describe(w,o);
@@ -67,6 +72,7 @@ LCCommandStatus lc_execute(LCWorld *w,const LCCommand *cmd,LCCommandReceipt *out
     default:break;
     }
     r.after_pose=w->player;r.after_held_id=w->held_object_id;
+    r.after_posture=w->posture;r.after_support_id=w->support_id;
     *out=r;
     return r.status;
 }

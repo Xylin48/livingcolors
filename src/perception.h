@@ -15,6 +15,7 @@ typedef struct {
     float vertical_fov_degrees,aspect;
 } LCView;
 bool lc_view(const LCPose *pose,LCView *out);
+bool lc_world_view(const LCWorld *world,LCView *out);
 /* Normalized view coordinates: left/top 0, right/bottom 1. Center .5,.5.
  * Pixel centers can be mapped by (pixel+.5)/width or height. */
 bool lc_view_ray(const LCPose *pose,float u,float v,LCVec *origin,LCVec *direction);

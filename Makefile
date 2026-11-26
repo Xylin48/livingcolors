@@ -1,8 +1,8 @@
 CC ?= cc
 CFLAGS ?= -O2 -std=c11 -Wall -Wextra -Werror -pedantic
 LDLIBS = -lm
-CORE = src/world.c src/save.c src/interaction.c src/command.c src/perception.c
-HEADERS = src/world.h src/interaction.h src/command.h src/perception.h
+CORE = src/world.c src/save.c src/interaction.c src/command.c src/perception.c src/body.c
+HEADERS = src/world.h src/interaction.h src/command.h src/perception.h src/body.h
 
 .PHONY: all test clean viewer
 all: test
@@ -21,12 +21,15 @@ build/test_command: $(CORE) $(HEADERS) tests/test_command.c | build
 	$(CC) $(CFLAGS) -Isrc $(CORE) tests/test_command.c -o $@ $(LDLIBS)
 build/test_perception: $(CORE) $(HEADERS) tests/test_perception.c | build
 	$(CC) $(CFLAGS) -Isrc $(CORE) tests/test_perception.c -o $@ $(LDLIBS)
-test: build/test_world build/test_interaction build/test_manipulation build/test_command build/test_perception
+build/test_body: $(CORE) $(HEADERS) tests/test_body.c | build
+	$(CC) $(CFLAGS) -Isrc $(CORE) tests/test_body.c -o $@ $(LDLIBS)
+test: build/test_world build/test_interaction build/test_manipulation build/test_command build/test_perception build/test_body
 	./build/test_world
 	./build/test_interaction
 	./build/test_manipulation
 	./build/test_command
 	./build/test_perception
+	./build/test_body
 
 # Optional desktop viewer; requires raylib from pkg-config.
 viewer: | build

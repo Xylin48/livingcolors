@@ -1,4 +1,5 @@
 #include "world.h"
+#include "body.h"
 
 #include <math.h>
 #include <stdio.h>
@@ -99,7 +100,7 @@ float lc_floor_height(float x,float z,float current_y) {
     return current_y>=1.5f?LC_UPSTAIRS_Y:0.0f;
 }
 bool lc_move(const LCWorld *w,LCPose *p,float dx,float dz,float dt) {
-    if(!w||!p||!finite_vec(p->position)||!isfinite(dx)||!isfinite(dz)||
+    if(!w||!p||(p==&w->player&&w->posture!=LC_STANDING)||!finite_vec(p->position)||!isfinite(dx)||!isfinite(dz)||
        !isfinite(dt)||dt<0||dt>1||lc_blocked(w,p->position)) return false;
     float length=hypotf(dx,dz);
     if(!isfinite(length))return false;
@@ -137,7 +138,7 @@ bool lc_toggle_object(LCWorld *w,uint32_t id,LCVec from) {
        !nearby(from,lc_object_shape(o),1.5f))return false;
     if(o->kind==LC_DOOR) {
         LCObject next=*o; next.flags^=LC_OBJ_OPEN;
-        if(overlaps(lc_object_shape(&next),w->player.position))return false;
+        if(lc_body_intersects(w,lc_object_shape(&next)))return false;
     }
     if(o->kind==LC_DOOR||o->kind==LC_CONTAINER)
         o->flags^=LC_OBJ_OPEN;
@@ -153,7 +154,7 @@ bool lc_placement_clear(const LCWorld *w,uint32_t id,LCBox a,bool all_objects) {
     const LCObject *item=NULL;
     for(size_t i=0;i<w->object_count;i++)if(w->objects[i].id==id)item=&w->objects[i];
     if(!item||!(item->flags&LC_OBJ_MOVABLE))return false;
-    if((item->flags&LC_OBJ_SOLID)&&overlaps(a,w->player.position))return false;
+    if(((item->flags&LC_OBJ_SOLID)||w->posture!=LC_STANDING)&&lc_body_intersects(w,a))return false;
     for(size_t i=0;i<w->count;i++)if(boxes_overlap(a,w->solids[i].shape))return false;
     for(size_t i=0;i<LC_STAIR_TREADS;i++){
         LCBox tread;
@@ -241,5 +242,6 @@ void lc_house(LCWorld *w) {
     object(w,213,"Closet hall door",LC_DOOR,box(3.47f,3,5.76f,3.55f,5.2f,6.83f),wood,LC_OBJ_SOLID|LC_OBJ_INTERACTIVE);
     object(w,214,"Closet bathroom door",LC_DOOR,box(3.47f,3,7.86f,3.55f,5.2f,8.78f),wood,LC_OBJ_SOLID|LC_OBJ_INTERACTIVE);
     object(w,210,"School reader",LC_BOOK,box(.63f,3.76f,3.10f,1.0f,3.8f,3.4f),(LCColor){212,185,128},LC_OBJ_MOVABLE|LC_OBJ_INTERACTIVE);
+    object(w,215,"School chair",LC_FURNITURE,box(1.9f,3,3.61f,2.45f,3.45f,4.16f),wood,LC_OBJ_SOLID);
     w->player=(LCPose){{6.0f,0,8.8f},0,0};
 }

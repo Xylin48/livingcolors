@@ -1,4 +1,5 @@
 #include "perception.h"
+#include "body.h"
 
 #include <math.h>
 
@@ -20,6 +21,11 @@ bool lc_view(const LCPose *p,LCView *out){
         return false;
     *out=v;return true;
 }
+bool lc_world_view(const LCWorld *w,LCView *out){
+    if(!w)return false;
+    LCPose p=lc_body_camera_pose(w);
+    return lc_view(&p,out);
+}
 bool lc_view_ray(const LCPose *pose,float u,float v,LCVec *origin,LCVec *direction){
     LCView camera;
     if(!origin||!direction||origin==direction||!isfinite(u)||!isfinite(v)||
@@ -36,5 +42,7 @@ bool lc_view_ray(const LCPose *pose,float u,float v,LCVec *origin,LCVec *directi
 }
 bool lc_view_sample(const LCWorld *w,float u,float v,float limit,LCHit *out){
     LCVec o,d;
-    return w&&lc_view_ray(&w->player,u,v,&o,&d)&&lc_cast(w,o,d,limit,out);
+    if(!w)return false;
+    LCPose p=lc_body_camera_pose(w);
+    return lc_view_ray(&p,u,v,&o,&d)&&lc_cast(w,o,d,limit,out);
 }

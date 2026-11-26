@@ -1,12 +1,12 @@
 #ifndef LC_INTERACTION_H
 #define LC_INTERACTION_H
 #include "world.h"
-#define LC_INTERACTION_API_VERSION 2u
+#define LC_INTERACTION_API_VERSION 3u
 #define LC_EYE_HEIGHT 1.35f
 /* Read-only geometric observation. A zero ID is architecture, not an object.
  * The caller owns the output; no global state or renderer dependency. */
 typedef struct { uint32_t object_id; float distance; LCVec point; } LCHit;
-typedef enum { LC_ACTION_TOGGLE=1, LC_ACTION_READ_NEXT=2, LC_ACTION_PICK_UP=3, LC_ACTION_PLACE=4 } LCAction;
+typedef enum { LC_ACTION_TOGGLE=1, LC_ACTION_READ_NEXT=2, LC_ACTION_PICK_UP=3, LC_ACTION_PLACE=4, LC_ACTION_SIT=5, LC_ACTION_REST=6, LC_ACTION_STAND=7 } LCAction;
 LCVec lc_eye(const LCPose *pose);
 LCVec lc_view_direction(const LCPose *pose);
 bool lc_cast(const LCWorld *world, LCVec origin, LCVec direction, float max_distance, LCHit *hit);

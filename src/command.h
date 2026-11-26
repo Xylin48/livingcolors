@@ -3,7 +3,7 @@
 
 #include "interaction.h"
 
-#define LC_COMMAND_API_VERSION 1u
+#define LC_COMMAND_API_VERSION 2u
 
 /* A renderer-independent, synchronous world command. Correlation IDs are
  * caller-owned labels, NOT event IDs or replay/deduplication guarantees.
@@ -48,6 +48,8 @@ typedef struct {
     uint32_t requested_object_id; /* input, not observed target metadata */
     LCPose before_pose,after_pose;
     uint32_t before_held_id,after_held_id;
+    LCPosture before_posture,after_posture;
+    uint32_t before_support_id,after_support_id;
     LCObjectState before_object,after_object; /* only on applied object actions */
 } LCCommandReceipt;
 

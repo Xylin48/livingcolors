@@ -1,4 +1,5 @@
 #include "interaction.h"
+#include "body.h"
 #include <math.h>
 #include <stdint.h>
 
@@ -52,7 +53,9 @@ bool lc_cast(const LCWorld *w,LCVec o,LCVec d,float limit,LCHit *out) {
     return true;
 }
 bool lc_focus(const LCWorld *w,float limit,LCHit *out){
-    return w && lc_cast(w,lc_eye(&w->player),lc_view_direction(&w->player),limit,out);
+    if(!w)return false;
+    LCPose p=lc_body_camera_pose(w);
+    return lc_cast(w,lc_eye(&p),lc_view_direction(&p),limit,out);
 }
 bool lc_look(LCWorld *w,float dyaw,float dpitch){
     if(!w||!isfinite(dyaw)||!isfinite(dpitch)||
@@ -70,7 +73,7 @@ static bool supported(LCBox support,LCBox item) {
            item.min.z>=support.min.z&&item.max.z<=support.max.z;
 }
 bool lc_place_held(LCWorld *w) {
-    if(!w||!w->held_object_id||lc_blocked(w,w->player.position))return false;
+    if(!w||!w->held_object_id||!lc_body_valid(w))return false;
     LCObject *o=lc_find_object(w,w->held_object_id);
     LCHit h;
     if(!o||!(o->flags&LC_OBJ_MOVABLE)||lc_view_direction(&w->player).y>=-.001f||
@@ -99,9 +102,12 @@ bool lc_place_held(LCWorld *w) {
     return true;
 }
 bool lc_use(LCWorld *w,uint32_t id,LCAction action){
+    if(action==LC_ACTION_STAND)return w&&id&&id==w->support_id&&lc_body_stand(w);
+    if(action==LC_ACTION_SIT||action==LC_ACTION_REST)
+        return lc_body_enter(w,id,action==LC_ACTION_SIT?LC_SEATED:LC_RESTING);
     if(action==LC_ACTION_PLACE)return w&&id&&id==w->held_object_id&&lc_place_held(w);
     LCHit hit;
-    if(!w||!id||lc_blocked(w,w->player.position)||!lc_focus(w,1.5f,&hit)||hit.object_id!=id)return false;
+    if(!w||!id||!lc_body_valid(w)||!lc_focus(w,1.5f,&hit)||hit.object_id!=id)return false;
     LCObject *o=lc_find_object(w,id);
     if(!o)return false;
     if(action==LC_ACTION_PICK_UP){
@@ -118,7 +124,7 @@ bool lc_use(LCWorld *w,uint32_t id,LCAction action){
     }
     if(!(o->flags&LC_OBJ_INTERACTIVE))return false;
     if(action==LC_ACTION_TOGGLE)
-        return lc_toggle_object(w,id,w->player.position);
+        return lc_toggle_object(w,id,lc_body_camera_pose(w).position);
     if(action==LC_ACTION_READ_NEXT && o->kind==LC_BOOK && o->progress<UINT32_MAX){
         o->progress++;return true;
     }

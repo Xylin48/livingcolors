@@ -18,6 +18,7 @@
 typedef struct { float x, y, z; } LCVec;
 typedef struct { LCVec min, max; } LCBox;
 typedef struct { LCVec position; float yaw, pitch; } LCPose;
+typedef enum { LC_STANDING=0, LC_SEATED=1, LC_RESTING=2 } LCPosture;
 typedef struct { uint8_t r, g, b; } LCColor;
 typedef struct { LCBox shape; LCColor color; } LCSolid;
 
@@ -51,6 +52,9 @@ typedef struct {
     size_t object_count;
     LCPose player;
     uint32_t held_object_id; /* zero or one existing movable object; no duplicate inventory */
+    LCPosture posture;
+    uint32_t support_id;
+    LCVec exit_position; /* previously occupied standing location */
 } LCWorld;
 
 bool lc_add_wall(LCWorld *world, LCBox shape, LCColor color);

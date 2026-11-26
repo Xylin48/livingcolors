@@ -3,6 +3,7 @@
 #include "world.h"
 #include "command.h"
 #include "perception.h"
+#include "body.h"
 #include "raylib.h"
 #include "raymath.h"
 
@@ -76,11 +77,25 @@ int main(void) {
                 .kind=LC_COMMAND_USE,.input.use={id,action}},&receipt)==LC_COMMAND_APPLIED)
                 puts(receipt.after_held_id?"Picked up object":"Placed object");
         }
+        if(IsKeyPressed(KEY_R)){
+            uint32_t id=w.support_id;
+            LCAction action=LC_ACTION_STAND;
+            if(!id){
+                LCHit hit;
+                if(lc_focus(&w,1.5f,&hit)){
+                    LCPosture p=lc_furniture_posture(lc_find_object(&w,hit.object_id));
+                    if(p!=LC_STANDING){id=hit.object_id;action=p==LC_SEATED?LC_ACTION_SIT:LC_ACTION_REST;}
+                }
+            }
+            if(id&&lc_execute(&w,&(LCCommand){.api_version=LC_COMMAND_API_VERSION,
+               .kind=LC_COMMAND_USE,.input.use={id,action}},&receipt)==LC_COMMAND_APPLIED)
+                printf("Posture: %u\n",(unsigned)receipt.after_posture);
+        }
         if(IsKeyPressed(KEY_F5))printf("Save: %s\n",lc_save(&w,"livingcolors.save")?"OK":"FAILED");
         if(IsKeyPressed(KEY_F9))printf("Load: %s\n",lc_load(&w,"livingcolors.save")?"OK":"FAILED");
         /* Read the current pose AFTER any load or interaction, not a stale yaw. */
         LCView view;
-        if(!lc_view(&w.player,&view))continue;
+        if(!lc_world_view(&w,&view))continue;
         Camera3D camera={0};
         camera.position=(Vector3){view.origin.x,view.origin.y,view.origin.z};
         camera.target=(Vector3){view.origin.x+view.forward.x,view.origin.y+view.forward.y,
