@@ -41,6 +41,21 @@ LCObject *lc_find_object(LCWorld *w,uint32_t id) {
     for(size_t i=0;i<w->object_count;i++) if(w->objects[i].id==id)return &w->objects[i];
     return NULL;
 }
+/* One physical shape for open doors, used by collision, rendering and sight. */
+LCBox lc_object_shape(const LCObject *o) {
+    LCBox b=o->shape;
+    if(o->kind!=LC_DOOR || !(o->flags&LC_OBJ_OPEN))return b;
+    float width=b.max.x-b.min.x, depth=b.max.z-b.min.z;
+    if(width>=depth) {
+        b.max.x=b.min.x+.09f;
+        if(b.min.z>5.0f)b.min.z=fmaxf(.13f,b.min.z-width);
+        else b.max.z=fminf(9.87f,b.min.z+width);
+    } else {
+        b.max.z=b.min.z+.09f;
+        b.max.x=fminf(11.87f,b.min.x+depth);
+    }
+    return b;
+}
 static bool overlaps(LCBox b,LCVec feet) {
     const float r=LC_PLAYER_RADIUS;
     return feet.x+r>b.min.x && feet.x-r<b.max.x &&
@@ -55,7 +70,7 @@ bool lc_blocked(const LCWorld *w, LCVec p) {
     for(size_t i=0;i<w->count;i++) if(overlaps(w->solids[i].shape,p)) return true;
     for(size_t i=0;i<w->object_count;i++) {
         const LCObject *o=&w->objects[i];
-        if((o->flags&LC_OBJ_SOLID) && !(o->kind==LC_DOOR && (o->flags&LC_OBJ_OPEN)) && overlaps(o->shape,p)) return true;
+        if((o->flags&LC_OBJ_SOLID) && overlaps(lc_object_shape(o),p)) return true;
     }
     return false;
 }
@@ -104,8 +119,10 @@ bool lc_toggle_object(LCWorld *w,uint32_t id,LCVec from) {
     LCObject *o=lc_find_object(w,id);
     if(!o||!finite_vec(from)||!(o->flags&LC_OBJ_INTERACTIVE)||
        !nearby(from,o->shape,1.5f))return false;
-    if(o->kind==LC_DOOR && (o->flags&LC_OBJ_OPEN) &&
-       overlaps(o->shape,w->player.position))return false;
+    if(o->kind==LC_DOOR) {
+        LCObject next=*o; next.flags^=LC_OBJ_OPEN;
+        if(overlaps(lc_object_shape(&next),w->player.position))return false;
+    }
     if(o->kind==LC_DOOR||o->kind==LC_CONTAINER)
         o->flags^=LC_OBJ_OPEN;
     else if(o->kind==LC_DEVICE)
@@ -134,8 +151,8 @@ bool lc_move_object(LCWorld *w,uint32_t id,LCVec from,LCVec target) {
            a.min.z<b.max.z && a.max.z>b.min.z) {o->shape=before;return false;}
     }
     for(size_t i=0;i<w->object_count;i++) {
-        LCObject *other=&w->objects[i]; LCBox a=o->shape,b=other->shape;
-        if(other==o||!(other->flags&LC_OBJ_SOLID)|| (other->kind==LC_DOOR && (other->flags&LC_OBJ_OPEN)))continue;
+        LCObject *other=&w->objects[i]; LCBox a=o->shape,b=lc_object_shape(other);
+        if(other==o||!(other->flags&LC_OBJ_SOLID))continue;
         if(a.min.x<b.max.x&&a.max.x>b.min.x&&a.min.y<b.max.y&&a.max.y>b.min.y&&
            a.min.z<b.max.z&&a.max.z>b.min.z){o->shape=before;return false;}
     }
@@ -155,6 +172,9 @@ void lc_house(LCWorld *w) {
     wall(w,10,0,4.2f,12,2.82f,4.32f,cream);
     /* Stair guide wall, permits entry near front and exit near upstairs hallway. */
     wall(w,9.92f,0,5.15f,10.04f,2.65f,9.0f,cream);
+    /* Physical upper floor; same geometry used by perception and rendering. */
+    wall(w,.13f,2.88f,.13f,10.20f,3.0f,9.87f,wood);
+    wall(w,10.20f,2.88f,.13f,11.87f,3.0f,4.30f,wood);
     /* Upstairs external walls and inner circulation. */
     wall(w,0,3,0,.13f,5.82f,10,wallblue);
     wall(w,11.87f,3,0,12,5.82f,10,wallblue);

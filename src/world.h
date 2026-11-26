@@ -54,6 +54,7 @@ typedef struct {
 bool lc_add_wall(LCWorld *world, LCBox shape, LCColor color);
 bool lc_add_box(LCWorld *world, LCBox shape); /* compatibility helper */
 bool lc_add_object(LCWorld *world, LCObject object);
+LCBox lc_object_shape(const LCObject *object);
 bool lc_blocked(const LCWorld *world, LCVec feet);
 float lc_floor_height(float x, float z, float current_y);
 bool lc_move(const LCWorld *world, LCPose *pose, float dx, float dz, float dt);

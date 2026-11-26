@@ -1,6 +1,7 @@
 /* Standalone manual inspection viewer. The authoritative world state lives in world.c,
  * not in this renderer. No model is required to navigate or test the geometry. */
 #include "world.h"
+#include "interaction.h"
 #include "raylib.h"
 #include "raymath.h"
 
@@ -34,47 +35,16 @@ static void draw_staircase(void) {
 }
 static void draw_scene(const LCWorld *w) {
     DrawPlane((Vector3){6,0,5},(Vector2){12,10},(Color){125,102,78,255});
-    /* Upper floor slabs, leaving a usable void over the right-side staircase. */
-    draw_box((LCBox){{.13f,2.88f,.13f},{10.20f,3.0f,9.87f}},(Color){163,139,105,255});
-    draw_box((LCBox){{10.20f,2.88f,.13f},{11.87f,3.0f,4.30f}},(Color){163,139,105,255});
     draw_staircase();
     for(size_t i=0;i<w->count;i++) draw_box(w->solids[i].shape,color(w->solids[i].color));
     for(size_t i=0;i<w->object_count;i++) {
         const LCObject *o=&w->objects[i];
-        if(o->kind==LC_DOOR && (o->flags&LC_OBJ_OPEN)) {
-            LCBox b=o->shape;
-            float width=b.max.x-b.min.x;
-            float depth=b.max.z-b.min.z;
-            if (width>=depth) {
-                b.max.x=b.min.x+.09f;
-                if (b.min.z>5.0f) b.min.z=fmaxf(.13f,b.min.z-width);
-                else b.max.z=fminf(9.87f,b.min.z+width);
-            } else {
-                b.max.z=b.min.z+.09f;
-                b.max.x=fminf(11.87f,b.min.x+depth);
-            }
-            draw_box(b,color(o->color));
-        } else {
-            Color c=color(o->color);
-            if(o->kind==LC_DEVICE && (o->flags&LC_OBJ_POWERED))c=(Color){73,132,126,255};
-            draw_box(o->shape,c);
-        }
+        Color c=color(o->color);
+        if(o->kind==LC_DEVICE && (o->flags&LC_OBJ_POWERED))c=(Color){73,132,126,255};
+        draw_box(lc_object_shape(o),c);
     }
 }
-static LCObject *nearest(LCWorld *w, LCVec pos) {
-    LCObject *best=NULL;
-    float smallest=1.55f;
-    for(size_t i=0;i<w->object_count;i++) {
-        LCObject *o=&w->objects[i];
-        if(!(o->flags&LC_OBJ_INTERACTIVE))continue;
-        LCVec c={(o->shape.min.x+o->shape.max.x)*.5f,
-                 (o->shape.min.y+o->shape.max.y)*.5f,
-                 (o->shape.min.z+o->shape.max.z)*.5f};
-        float d=hypotf(hypotf(c.x-pos.x,c.y-(pos.y+1.0f)),c.z-pos.z);
-        if(d<smallest){smallest=d;best=o;}
-    }
-    return best;
-}
+
 int main(void) {
     LCWorld w;
     lc_house(&w);
@@ -85,28 +55,26 @@ int main(void) {
     while(!WindowShouldClose()) {
         float dt=fminf(GetFrameTime(),.05f);
         Vector2 mouse=GetMouseDelta();
-        w.player.yaw+=mouse.x*.0025f;
-        w.player.pitch-=mouse.y*.0025f;
-        w.player.pitch=Clamp(w.player.pitch,-1.40f,1.40f);
+        (void)lc_look(&w,mouse.x*.0025f,-mouse.y*.0025f);
         float forward=(IsKeyDown(KEY_W)?1.0f:0.0f)-(IsKeyDown(KEY_S)?1.0f:0.0f);
         float right=(IsKeyDown(KEY_D)?1.0f:0.0f)-(IsKeyDown(KEY_A)?1.0f:0.0f);
         const float yaw=w.player.yaw;
         const float dx=right*cosf(yaw)+forward*sinf(yaw);
         const float dz=right*sinf(yaw)-forward*cosf(yaw);
         (void)lc_move(&w,&w.player,dx,dz,dt);
-        if(IsKeyPressed(KEY_E)) {
-            LCObject *o=nearest(&w,w.player.position);
-            if(o && lc_toggle_object(&w,o->id,w.player.position))
-                printf("Interacted with %s (%u)\n",o->name,o->id);
-        }
-        if(IsKeyPressed(KEY_P)) {
-            LCObject *book=lc_find_object(&w,210);
-            if(book) {book->progress++;printf("School reader progress: %u\n",book->progress);}
+        if(IsKeyPressed(KEY_E) || IsKeyPressed(KEY_P)) {
+            LCHit hit;
+            if(lc_focus(&w,1.5f,&hit) && hit.object_id) {
+                LCAction action=IsKeyPressed(KEY_E)?LC_ACTION_TOGGLE:LC_ACTION_READ_NEXT;
+                if(lc_use(&w,hit.object_id,action))
+                    printf("Interacted with object %u\n",hit.object_id);
+            }
         }
         if(IsKeyPressed(KEY_F5))printf("Save: %s\n",lc_save(&w,"livingcolors.save")?"OK":"FAILED");
         if(IsKeyPressed(KEY_F9))printf("Load: %s\n",lc_load(&w,"livingcolors.save")?"OK":"FAILED");
         const float cy=cosf(w.player.pitch),sy=sinf(w.player.pitch);
-        Vector3 origin={w.player.position.x,w.player.position.y+1.35f,w.player.position.z};
+        LCVec eye=lc_eye(&w.player);
+        Vector3 origin={eye.x,eye.y,eye.z};
         Camera3D camera={0};
         camera.position=origin;
         camera.target=(Vector3){origin.x+sinf(yaw)*cy,origin.y+sy,origin.z-cosf(yaw)*cy};
