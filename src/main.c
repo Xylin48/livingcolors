@@ -6,6 +6,7 @@
 #include "body.h"
 #include "storage.h"
 #include "environment.h"
+#include "scene.h"
 #include "raylib.h"
 #include "raymath.h"
 
@@ -25,31 +26,12 @@ static void draw_box(LCBox b,Color c) {
     /* Small outlines make individual pieces recognizable at 640x480. */
     DrawCubeWiresV(center(b),extent(b),ColorBrightness(c,-.30f));
 }
-static Color lit(const LCWorld *w,LCBox b,Color c){
-    Vector3 p=center(b);
-    float level=lc_environment_light_at(w,(LCVec){p.x,p.y,p.z});
-    return (Color){(unsigned char)(c.r*level),(unsigned char)(c.g*level),(unsigned char)(c.b*level),c.a};
+static void draw_part(const LCScenePart *p,void *ctx){
+    draw_box(p->bounds,color(lc_scene_lit_color(ctx,p)));
 }
-static void draw_staircase(const LCWorld *w) {
-    /* The same treads are used by the virtual sight ray. */
-    for(size_t i=0;i<LC_STAIR_TREADS;i++){
-        LCBox step;
-        if(lc_stair_tread(i,&step))draw_box(step,lit(w,step,(Color){119,78,46,255}));
-    }
-}
-static void draw_scene(const LCWorld *w) {
-    draw_staircase(w);
-    for(size_t i=0;i<w->count;i++) draw_box(w->solids[i].shape,lit(w,w->solids[i].shape,color(w->solids[i].color)));
-    for(size_t i=0;i<w->object_count;i++) {
-        const LCObject *o=&w->objects[i];
-        if(!lc_storage_visible(w,o))continue;
-        Color c=color(o->color);
-        if(o->kind==LC_DEVICE && (o->flags&LC_OBJ_POWERED))c=(Color){73,132,126,255};
-        LCBox panels[LC_CONTAINER_PANELS];
-        size_t n=lc_container_panels(o,panels);
-        if(!n){panels[0]=lc_object_shape(o);n=1;}
-        for(size_t j=0;j<n;j++)draw_box(panels[j],lit(w,panels[j],c));
-    }
+static void draw_scene(const LCWorld *w){
+    /* Visitor is read-only; the context points to the same world. */
+    (void)lc_scene_visit(w,draw_part,(void *)w);
 }
 
 int main(void) {
@@ -167,8 +149,7 @@ int main(void) {
         camera.fovy=view.vertical_fov_degrees;
         camera.projection=CAMERA_PERSPECTIVE;
         BeginDrawing();
-        float sky=.10f+.90f*lc_environment_daylight(&w);
-        ClearBackground((Color){(unsigned char)(137*sky),(unsigned char)(164*sky),(unsigned char)(176*sky),255});
+        ClearBackground(color(lc_scene_sky(&w)));
         BeginMode3D(camera);
         draw_scene(&w);
         EndMode3D();

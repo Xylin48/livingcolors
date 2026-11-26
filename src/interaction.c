@@ -1,6 +1,7 @@
 #include "interaction.h"
 #include "body.h"
 #include "storage.h"
+#include "scene.h"
 #include <math.h>
 #include <stdint.h>
 
@@ -28,34 +29,24 @@ static bool intersect(LCBox b,LCVec o,LCVec d,float limit,float *distance) {
        !slab(o.z,d.z,b.min.z,b.max.z,&near,&far))return false;
     *distance=near;return true;
 }
+typedef struct { LCVec origin,direction; float best; uint32_t id; bool found; } CastState;
+static void cast_part(const LCScenePart *p,void *ctx){
+    CastState *s=ctx;
+    float t;
+    if(intersect(p->bounds,s->origin,s->direction,s->best,&t)&&
+       (!s->found||!p->object_id||t<s->best)){
+        s->best=t;s->id=p->object_id;s->found=true;
+    }
+}
 bool lc_cast(const LCWorld *w,LCVec o,LCVec d,float limit,LCHit *out) {
     if(!w||!out||!finite_vec(o)||!finite_vec(d)||!isfinite(limit)||limit<=0 ||
        w->count>LC_MAX_SOLIDS||w->object_count>LC_MAX_OBJECTS)return false;
     float n=hypotf(hypotf(d.x,d.y),d.z);
     if(!isfinite(n)||n<1e-8f)return false;
     d=(LCVec){d.x/n,d.y/n,d.z/n};
-    float best=limit,t;uint32_t id=0;bool found=false;
-    for(size_t i=0;i<w->count;i++){
-        if(intersect(w->solids[i].shape,o,d,best,&t)){best=t;found=true;}
-    }
-    for(size_t i=0;i<LC_STAIR_TREADS;i++){
-        LCBox tread;
-        if(lc_stair_tread(i,&tread)&&intersect(tread,o,d,best,&t)){best=t;found=true;}
-    }
-    for(size_t i=0;i<w->object_count;i++){
-        const LCObject *obj=&w->objects[i];
-        if(!lc_storage_visible(w,obj))continue;
-        LCBox panels[LC_CONTAINER_PANELS];
-        size_t n=lc_container_panels(obj,panels);
-        if(!n){panels[0]=lc_object_shape(obj);n=1;}
-        for(size_t j=0;j<n;j++){
-            if(intersect(panels[j],o,d,best,&t)&&(!found||t<best)){
-                best=t;id=obj->id;found=true;
-            }
-        }
-    }
-    if(!found)return false;
-    *out=(LCHit){id,best,{o.x+d.x*best,o.y+d.y*best,o.z+d.z*best}};
+    CastState s={.origin=o,.direction=d,.best=limit};
+    if(!lc_scene_visit(w,cast_part,&s)||!s.found)return false;
+    *out=(LCHit){s.id,s.best,{o.x+d.x*s.best,o.y+d.y*s.best,o.z+d.z*s.best}};
     return true;
 }
 bool lc_focus(const LCWorld *w,float limit,LCHit *out){
