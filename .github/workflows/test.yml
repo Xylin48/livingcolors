@@ -1,0 +1,15 @@
+name: Living Colors core tests
+on:
+  push:
+  pull_request:
+jobs:
+  native-core:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build and exercise native core
+        run: make test
+      - name: Address and undefined behavior sanitizers
+        run: |
+          make clean
+          make test CFLAGS='-O1 -g -std=c11 -Wall -Wextra -Werror -pedantic -fsanitize=address,undefined -fno-omit-frame-pointer' LDLIBS='-lm -fsanitize=address,undefined'
