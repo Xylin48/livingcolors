@@ -44,9 +44,15 @@ static void draw_scene(const LCWorld *w) {
         if(o->kind==LC_DOOR && (o->flags&LC_OBJ_OPEN)) {
             LCBox b=o->shape;
             float width=b.max.x-b.min.x;
-            b.max.x=b.min.x+.09f;
-            if (b.min.z>5.0f) b.min.z=fmaxf(.13f,b.min.z-width);
-            else b.max.z=fminf(9.87f,b.min.z+width);
+            float depth=b.max.z-b.min.z;
+            if (width>=depth) {
+                b.max.x=b.min.x+.09f;
+                if (b.min.z>5.0f) b.min.z=fmaxf(.13f,b.min.z-width);
+                else b.max.z=fminf(9.87f,b.min.z+width);
+            } else {
+                b.max.z=b.min.z+.09f;
+                b.max.x=fminf(11.87f,b.min.x+depth);
+            }
             draw_box(b,color(o->color));
         } else {
             Color c=color(o->color);
