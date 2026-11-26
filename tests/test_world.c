@@ -41,6 +41,9 @@ int main(void) {
     assert(lc_move(&w,&p,-1,0,.6f));
     assert(p.position.x<10.2f);
     assert(close_to(p.position.y,3.0f));
+    p=(LCPose){{10.8f,lc_floor_height(10.8f,4.7f,3.0f),4.7f},0,0};
+    for(int i=0;i<200;i++)assert(lc_move(&w,&p,0,1,.03f));
+    assert(p.position.y<.2f && p.position.z>9.4f); /* descent back to ground */
 
     LCObject *tv=lc_find_object(&w,103);
     assert(tv && !(tv->flags&LC_OBJ_POWERED));
