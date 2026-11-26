@@ -104,6 +104,8 @@ bool lc_toggle_object(LCWorld *w,uint32_t id,LCVec from) {
     LCObject *o=lc_find_object(w,id);
     if(!o||!finite_vec(from)||!(o->flags&LC_OBJ_INTERACTIVE)||
        !nearby(from,o->shape,1.5f))return false;
+    if(o->kind==LC_DOOR && (o->flags&LC_OBJ_OPEN) &&
+       overlaps(o->shape,w->player.position))return false;
     if(o->kind==LC_DOOR||o->kind==LC_CONTAINER)
         o->flags^=LC_OBJ_OPEN;
     else if(o->kind==LC_DEVICE)
@@ -122,7 +124,10 @@ bool lc_move_object(LCWorld *w,uint32_t id,LCVec from,LCVec target) {
     o->shape.min=target;
     o->shape.max=(LCVec){before.max.x+delta.x,before.max.y+delta.y,before.max.z+delta.z};
     if(!valid_box(o->shape) || o->shape.max.x>LC_WORLD_WIDTH ||
-       o->shape.max.z>LC_WORLD_DEPTH) {o->shape=before;return false;}
+       o->shape.max.z>LC_WORLD_DEPTH ||
+       ((o->flags&LC_OBJ_SOLID) && overlaps(o->shape,w->player.position))) {
+        o->shape=before;return false;
+    }
     for(size_t i=0;i<w->count;i++) {
         LCBox b=w->solids[i].shape,a=o->shape;
         if(a.min.x<b.max.x && a.max.x>b.min.x && a.min.y<b.max.y && a.max.y>b.min.y &&
