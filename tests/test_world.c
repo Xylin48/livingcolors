@@ -59,6 +59,8 @@ int main(void) {
     assert(lc_toggle_object(&w,110,(LCVec){6.0f,0,8.85f}));
     w.player.position=(LCVec){6.0f,0,9.7f};
     assert(!lc_blocked(&w,w.player.position));
+    assert(!lc_toggle_object(&w,110,w.player.position)); /* cannot trap player in closing door */
+    assert(lc_find_object(&w,110)->flags&LC_OBJ_OPEN);
     const char *save="/tmp/livingcolors_unit_save.dat";
     assert(lc_save(&w,save));
     LCWorld fresh;lc_house(&fresh);
