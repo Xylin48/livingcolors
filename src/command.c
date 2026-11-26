@@ -79,7 +79,11 @@ LCCommandStatus lc_execute(LCWorld *w,const LCCommand *cmd,LCCommandReceipt *out
         if(cmd->api_version<4)break;
         const LCSenseKind sense=cmd->input.sense.kind;
         const uint32_t expected=cmd->input.sense.expected_object_id;
-        if(sense==LC_SENSE_ENVIRONMENT){
+        if(sense==LC_SENSE_AUDIO){
+            if(cmd->api_version<5||expected)break;
+            if(!lc_audio_sample(w,&r.audio_sample)){r.status=LC_COMMAND_REJECTED;break;}
+            r.has_audio_sample=true;
+        }else if(sense==LC_SENSE_ENVIRONMENT){
             if(expected)break;
             if(!lc_environment_sample(w,&r.environment_sample)){r.status=LC_COMMAND_REJECTED;break;}
             r.has_environment_sample=true;

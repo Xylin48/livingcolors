@@ -138,6 +138,18 @@ int main(void) {
                        (unsigned)s.surface.material,(unsigned)s.surface.known);
             }
         }
+        if(IsKeyPressed(KEY_J)){
+            LCCommand sense={.api_version=LC_COMMAND_API_VERSION,.kind=LC_COMMAND_SENSE,
+                             .input.sense={LC_SENSE_AUDIO,0}};
+            if(lc_execute(&w,&sense,&receipt)==LC_COMMAND_OBSERVED){
+                printf("Audible simulated sources: %zu\n",receipt.audio_sample.count);
+                for(size_t i=0;i<receipt.audio_sample.count;i++){
+                    LCSoundCue c=receipt.audio_sample.cues[i];
+                    printf("  source=%u bearing=%.2f distance=%.2f gain=%.3f obstructed=%u\n",
+                           c.source_id,c.relative_bearing_rad,c.distance_m,c.gain,(unsigned)c.obstructed);
+                }
+            }
+        }
         if(IsKeyPressed(KEY_F5))printf("Save: %s\n",lc_save(&w,"livingcolors.save")?"OK":"FAILED");
         if(IsKeyPressed(KEY_F9)){
             bool loaded=lc_load(&w,"livingcolors.save");

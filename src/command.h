@@ -4,14 +4,15 @@
 #include "interaction.h"
 #include "environment.h"
 #include "contact.h"
+#include "acoustics.h"
 
-#define LC_COMMAND_API_VERSION 4u
+#define LC_COMMAND_API_VERSION 5u
 #define LC_COMMAND_MIN_VERSION 1u
 
 /* A renderer-independent, synchronous world command. Correlation IDs are
  * caller-owned labels, NOT event IDs or replay/deduplication guarantees.
  * One world owner serializes calls. No external network or model required.
- * Recompiled clients may request earlier semantic versions (1–4); this is
+ * Recompiled clients may request earlier semantic versions (1–5); this is
  * not a stable binary ABI. Receipts always use the current struct version. */
 typedef enum {
     LC_COMMAND_WALK=1, LC_COMMAND_LOOK=2, LC_COMMAND_USE=3, LC_COMMAND_SENSE=4
@@ -23,7 +24,7 @@ typedef enum {
 
 typedef enum {
     LC_SENSE_ENVIRONMENT=1, LC_SENSE_FOCUSED_CONTACT=2,
-    LC_SENSE_HELD_CONTACT=3, LC_SENSE_SUPPORT_CONTACT=4
+    LC_SENSE_HELD_CONTACT=3, LC_SENSE_SUPPORT_CONTACT=4, LC_SENSE_AUDIO=5
 } LCSenseKind;
 
 typedef struct {
@@ -67,6 +68,8 @@ typedef struct {
     bool has_environment_sample,has_contact_sample;
     LCEnvironmentSample environment_sample;
     LCContactSample contact_sample;
+    bool has_audio_sample;
+    LCAudioSample audio_sample;
 } LCCommandReceipt;
 
 /* Receipts report observed in-memory state transitions, not durable Life Log
