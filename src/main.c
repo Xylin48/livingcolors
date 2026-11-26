@@ -5,6 +5,7 @@
 #include "perception.h"
 #include "body.h"
 #include "storage.h"
+#include "environment.h"
 #include "raylib.h"
 #include "raymath.h"
 
@@ -24,16 +25,21 @@ static void draw_box(LCBox b,Color c) {
     /* Small outlines make individual pieces recognizable at 640x480. */
     DrawCubeWiresV(center(b),extent(b),ColorBrightness(c,-.30f));
 }
-static void draw_staircase(void) {
+static Color lit(const LCWorld *w,LCBox b,Color c){
+    Vector3 p=center(b);
+    float level=lc_environment_light_at(w,(LCVec){p.x,p.y,p.z});
+    return (Color){(unsigned char)(c.r*level),(unsigned char)(c.g*level),(unsigned char)(c.b*level),c.a};
+}
+static void draw_staircase(const LCWorld *w) {
     /* The same treads are used by the virtual sight ray. */
     for(size_t i=0;i<LC_STAIR_TREADS;i++){
         LCBox step;
-        if(lc_stair_tread(i,&step))draw_box(step,(Color){119,78,46,255});
+        if(lc_stair_tread(i,&step))draw_box(step,lit(w,step,(Color){119,78,46,255}));
     }
 }
 static void draw_scene(const LCWorld *w) {
-    draw_staircase();
-    for(size_t i=0;i<w->count;i++) draw_box(w->solids[i].shape,color(w->solids[i].color));
+    draw_staircase(w);
+    for(size_t i=0;i<w->count;i++) draw_box(w->solids[i].shape,lit(w,w->solids[i].shape,color(w->solids[i].color)));
     for(size_t i=0;i<w->object_count;i++) {
         const LCObject *o=&w->objects[i];
         if(!lc_storage_visible(w,o))continue;
@@ -42,7 +48,7 @@ static void draw_scene(const LCWorld *w) {
         LCBox panels[LC_CONTAINER_PANELS];
         size_t n=lc_container_panels(o,panels);
         if(!n){panels[0]=lc_object_shape(o);n=1;}
-        for(size_t j=0;j<n;j++)draw_box(panels[j],c);
+        for(size_t j=0;j<n;j++)draw_box(panels[j],lit(w,panels[j],c));
     }
 }
 
@@ -53,8 +59,16 @@ int main(void) {
     InitWindow((int)LC_VIEW_WIDTH,(int)LC_VIEW_HEIGHT,"Living Colors - standalone world prototype");
     SetTargetFPS(30);
     DisableCursor();
+    double time_remainder_ms=0;
     while(!WindowShouldClose()) {
-        float dt=fminf(GetFrameTime(),.05f);
+        float frame=GetFrameTime();
+        if(isfinite(frame)&&frame>0){
+            time_remainder_ms+=fminf(frame,1.0f)*1000.0;
+            uint32_t ms=(uint32_t)time_remainder_ms;
+            if(lc_environment_advance(&w,ms))time_remainder_ms-=ms;
+            else time_remainder_ms=0;
+        }
+        float dt=fminf(frame,.05f);
         Vector2 mouse=GetMouseDelta();
         LCCommandReceipt receipt;
         (void)lc_execute(&w,&(LCCommand){.api_version=LC_COMMAND_API_VERSION,
@@ -106,7 +120,11 @@ int main(void) {
                 printf("Posture: %u\n",(unsigned)receipt.after_posture);
         }
         if(IsKeyPressed(KEY_F5))printf("Save: %s\n",lc_save(&w,"livingcolors.save")?"OK":"FAILED");
-        if(IsKeyPressed(KEY_F9))printf("Load: %s\n",lc_load(&w,"livingcolors.save")?"OK":"FAILED");
+        if(IsKeyPressed(KEY_F9)){
+            bool loaded=lc_load(&w,"livingcolors.save");
+            if(loaded)time_remainder_ms=0;
+            printf("Load: %s\n",loaded?"OK":"FAILED");
+        }
         /* Read the current pose AFTER any load or interaction, not a stale yaw. */
         LCView view;
         if(!lc_world_view(&w,&view))continue;
@@ -118,7 +136,8 @@ int main(void) {
         camera.fovy=view.vertical_fov_degrees;
         camera.projection=CAMERA_PERSPECTIVE;
         BeginDrawing();
-        ClearBackground((Color){137,164,176,255});
+        float sky=.10f+.90f*lc_environment_daylight(&w);
+        ClearBackground((Color){(unsigned char)(137*sky),(unsigned char)(164*sky),(unsigned char)(176*sky),255});
         BeginMode3D(camera);
         draw_scene(&w);
         EndMode3D();

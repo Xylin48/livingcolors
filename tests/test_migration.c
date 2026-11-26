@@ -6,11 +6,16 @@
 #include <math.h>
 #include <stdio.h>
 /* Historical file layouts intentionally reproduced here, independently of the
- * current writer. v1/v2 snapshots predate the chair, v3 includes it. */
+ * current writer. v1/v2 predate the chair; v1–v4 predate the light switches. */
 static void write_legacy(const LCWorld *w,const char *path,unsigned format){
     FILE *f=fopen(path,"w");assert(f);
-    size_t count=w->object_count;
-    if(format<3)count--;
+    size_t count=0;
+    for(size_t i=0;i<w->object_count;i++){
+        uint32_t id=w->objects[i].id;
+        if(id>=301&&id<=306)continue;
+        if(format<3&&id==215)continue;
+        count++;
+    }
     assert(fprintf(f,"LIVINGCOLORS %u\n%a %a %a %a %a\n",format,
         (double)w->player.position.x,(double)w->player.position.y,
         (double)w->player.position.z,(double)w->player.yaw,(double)w->player.pitch)>0);
@@ -20,10 +25,12 @@ static void write_legacy(const LCWorld *w,const char *path,unsigned format){
     assert(fprintf(f,"%zu\n",count)>0);
     for(size_t i=0;i<w->object_count;i++){
         const LCObject *o=&w->objects[i];
-        if(format<3&&o->id==215)continue;
-        assert(fprintf(f,"%u %u %u %a %a %a %a %a %a\n",o->id,o->flags,o->progress,
+        if((o->id>=301&&o->id<=306)||(format<3&&o->id==215))continue;
+        assert(fprintf(f,"%u %u %u %a %a %a %a %a %a",o->id,o->flags,o->progress,
           (double)o->shape.min.x,(double)o->shape.min.y,(double)o->shape.min.z,
           (double)o->shape.max.x,(double)o->shape.max.y,(double)o->shape.max.z)>0);
+        if(format>=4)assert(fprintf(f," %u %u",o->container_id,o->container_slot)>0);
+        assert(fputc('\n',f)!=EOF);
     }
     assert(fputs("END\n",f)>=0);assert(fclose(f)==0);
 }
@@ -53,9 +60,12 @@ int main(void){
     assert(fresh.held_object_id==210&&fresh.posture==LC_SEATED&&fresh.support_id==101);
     assert(lc_body_valid(&fresh)&&lc_body_stand(&fresh)&&lc_storage_valid(&fresh));
     assert(fresh.held_object_id==210&&lc_find_object(&fresh,210)->progress==21);
+    write_legacy(&fresh,path,4);
+    lc_house(&w);assert(lc_load(&w,path));
+    assert(w.held_object_id==210&&w.environment_elapsed_ms==0&&lc_find_object(&w,301));
     assert(lc_save(&fresh,path));lc_house(&w);assert(lc_load(&w,path));
     assert(w.held_object_id==210&&w.posture==LC_STANDING&&lc_find_object(&w,210)->progress==21);
     assert(remove(path)==0);
-    puts("Living Colors: independent v1/v2/v3 snapshot migration and v4 round trip tests passed");
+    puts("Living Colors: independent v1/v2/v3/v4 snapshot migration and v5 round trip tests passed");
     return 0;
 }

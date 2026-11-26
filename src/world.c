@@ -244,5 +244,14 @@ void lc_house(LCWorld *w) {
     object(w,214,"Closet bathroom door",LC_DOOR,box(3.47f,3,7.86f,3.55f,5.2f,8.78f),wood,LC_OBJ_SOLID|LC_OBJ_INTERACTIVE);
     object(w,210,"School reader",LC_BOOK,box(.63f,3.76f,3.10f,1.0f,3.8f,3.4f),(LCColor){212,185,128},LC_OBJ_MOVABLE|LC_OBJ_INTERACTIVE);
     object(w,215,"School chair",LC_FURNITURE,box(1.9f,3,3.61f,2.45f,3.45f,4.16f),wood,LC_OBJ_SOLID);
+    /* Wall-mounted switches use the existing power-state contract; no extra device DB. */
+    const LCColor switch_color={225,220,204};
+    const uint32_t switch_flags=LC_OBJ_INTERACTIVE;
+    object(w,301,"Living room light switch",LC_DEVICE,box(4.9f,1.1f,9.79f,5.04f,1.27f,9.86f),switch_color,switch_flags);
+    object(w,302,"Kitchen light switch",LC_DEVICE,box(8.15f,1.1f,4.12f,8.3f,1.27f,4.19f),switch_color,switch_flags);
+    object(w,303,"Bedroom light switch",LC_DEVICE,box(5.8f,4.1f,4.22f,5.94f,4.27f,4.29f),switch_color,switch_flags);
+    object(w,304,"Hall light switch",LC_DEVICE,box(6.0f,4.1f,4.44f,6.14f,4.27f,4.51f),switch_color,switch_flags);
+    object(w,305,"Bathroom light switch",LC_DEVICE,box(6.6f,4.1f,7.13f,6.74f,4.27f,7.2f),switch_color,switch_flags);
+    object(w,306,"Closet light switch",LC_DEVICE,box(3.37f,4.1f,6.95f,3.44f,4.27f,7.09f),switch_color,switch_flags);
     w->player=(LCPose){{6.0f,0,8.8f},0,0};
 }

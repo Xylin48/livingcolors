@@ -1,6 +1,7 @@
 #include "world.h"
 #include "body.h"
 #include "storage.h"
+#include <inttypes.h>
 
 #include <math.h>
 #include <stdio.h>
@@ -26,11 +27,12 @@ bool lc_save(const LCWorld *world, const char *path) {
     memcpy(tmp+n,".tmp",5);
     FILE *f=fopen(tmp,"w");
     if(!f){free(tmp);return false;}
-    int good=fprintf(f,"LIVINGCOLORS 4\n%a %a %a %a %a\n%u\n%u %u %a %a %a\n%zu\n",
+    int good=fprintf(f,"LIVINGCOLORS 5\n%a %a %a %a %a\n%u\n%u %u %a %a %a\n%" PRIu64 "\n%zu\n",
        (double)world->player.position.x,(double)world->player.position.y,
        (double)world->player.position.z,(double)world->player.yaw,
        (double)world->player.pitch,world->held_object_id,(unsigned)world->posture,world->support_id,
-       (double)world->exit_position.x,(double)world->exit_position.y,(double)world->exit_position.z,world->object_count)>0;
+       (double)world->exit_position.x,(double)world->exit_position.y,(double)world->exit_position.z,
+       world->environment_elapsed_ms,world->object_count)>0;
     for(size_t i=0;i<world->object_count && good;i++) {
         const LCObject *o=&world->objects[i];
         good=fprintf(f,"%u %u %u %a %a %a %a %a %a %u %u\n",
@@ -53,7 +55,7 @@ bool lc_load(LCWorld *world, const char *path) {
     LCWorld staged=*world;
     unsigned format;
     char magic[24]={0};
-    if(fscanf(f,"%23s %u",magic,&format)!=2 || strcmp(magic,"LIVINGCOLORS")!=0 || (format<1 || format>4))
+    if(fscanf(f,"%23s %u",magic,&format)!=2 || strcmp(magic,"LIVINGCOLORS")!=0 || (format<1 || format>5))
         goto invalid;
     if(fscanf(f,"%f %f %f %f %f",&staged.player.position.x,
         &staged.player.position.y,&staged.player.position.z,
@@ -72,6 +74,8 @@ bool lc_load(LCWorld *world, const char *path) {
            !isfinite(staged.exit_position.z))goto invalid;
         staged.posture=(LCPosture)posture;
     }
+    staged.environment_elapsed_ms=0;
+    if(format>=5&&fscanf(f,"%" SCNu64,&staged.environment_elapsed_ms)!=1)goto invalid;
     size_t count=0;
     /* Older snapshots may predate additive object definitions. Retain caller-supplied state for
      * new IDs (fresh definitions if the caller initialized a fresh world); unknown and duplicate IDs still fail. */

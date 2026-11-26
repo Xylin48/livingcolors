@@ -56,6 +56,7 @@ typedef struct {
     LCPosture posture;
     uint32_t support_id;
     LCVec exit_position; /* previously occupied standing location */
+    uint64_t environment_elapsed_ms; /* explicit simulation time, not wall clock */
 } LCWorld;
 
 bool lc_add_wall(LCWorld *world, LCBox shape, LCColor color);
