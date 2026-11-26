@@ -1,8 +1,8 @@
 CC ?= cc
 CFLAGS ?= -O2 -std=c11 -Wall -Wextra -Werror -pedantic
 LDLIBS = -lm
-CORE = src/world.c src/save.c src/interaction.c src/command.c src/perception.c src/body.c src/storage.c src/environment.c
-HEADERS = src/world.h src/interaction.h src/command.h src/perception.h src/body.h src/storage.h src/environment.h
+CORE = src/world.c src/save.c src/interaction.c src/command.c src/perception.c src/body.c src/storage.c src/environment.c src/contact.c
+HEADERS = src/world.h src/interaction.h src/command.h src/perception.h src/body.h src/storage.h src/environment.h src/contact.h
 
 .PHONY: all test clean viewer
 all: test
@@ -29,7 +29,9 @@ build/test_migration: $(CORE) $(HEADERS) tests/test_migration.c | build
 	$(CC) $(CFLAGS) -Isrc $(CORE) tests/test_migration.c -o $@ $(LDLIBS)
 build/test_environment: $(CORE) $(HEADERS) tests/test_environment.c | build
 	$(CC) $(CFLAGS) -Isrc $(CORE) tests/test_environment.c -o $@ $(LDLIBS)
-test: build/test_world build/test_interaction build/test_manipulation build/test_command build/test_perception build/test_body build/test_storage build/test_migration build/test_environment
+build/test_contact: $(CORE) $(HEADERS) tests/test_contact.c | build
+	$(CC) $(CFLAGS) -Isrc $(CORE) tests/test_contact.c -o $@ $(LDLIBS)
+test: build/test_world build/test_interaction build/test_manipulation build/test_command build/test_perception build/test_body build/test_storage build/test_migration build/test_environment build/test_contact
 	./build/test_world
 	./build/test_interaction
 	./build/test_manipulation
@@ -39,6 +41,7 @@ test: build/test_world build/test_interaction build/test_manipulation build/test
 	./build/test_storage
 	./build/test_migration
 	./build/test_environment
+	./build/test_contact
 
 # Optional desktop viewer; requires raylib from pkg-config.
 viewer: | build

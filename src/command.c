@@ -26,12 +26,16 @@ LCCommandStatus lc_execute(LCWorld *w,const LCCommand *cmd,LCCommandReceipt *out
         if(cmd->kind==LC_COMMAND_USE){
             r.requested_action=cmd->input.use.action;
             r.requested_object_id=cmd->input.use.object_id;
+        }else if(cmd->kind==LC_COMMAND_SENSE){
+            r.requested_sense=cmd->input.sense.kind;
+            r.requested_object_id=cmd->input.sense.expected_object_id;
         }
     }
     if(!w||!cmd||cmd->api_version<LC_COMMAND_MIN_VERSION||cmd->api_version>LC_COMMAND_API_VERSION||
        !lc_body_valid(w)){
         *out=r;return r.status;
     }
+    r.environment_elapsed_ms=w->environment_elapsed_ms;
     r.before_pose=r.after_pose=w->player;
     r.before_held_id=r.after_held_id=w->held_object_id;
     r.before_posture=r.after_posture=w->posture;
@@ -69,6 +73,29 @@ LCCommandStatus lc_execute(LCWorld *w,const LCCommand *cmd,LCCommandReceipt *out
         r.before_object=before;
         r.after_object=describe(w,o);
         r.status=LC_COMMAND_APPLIED;
+        break;
+    }
+    case LC_COMMAND_SENSE:{
+        if(cmd->api_version<4)break;
+        const LCSenseKind sense=cmd->input.sense.kind;
+        const uint32_t expected=cmd->input.sense.expected_object_id;
+        if(sense==LC_SENSE_ENVIRONMENT){
+            if(expected)break;
+            if(!lc_environment_sample(w,&r.environment_sample)){r.status=LC_COMMAND_REJECTED;break;}
+            r.has_environment_sample=true;
+        }else{
+            LCContactMode mode;
+            switch(sense){
+            case LC_SENSE_FOCUSED_CONTACT:mode=LC_CONTACT_FOCUSED;break;
+            case LC_SENSE_HELD_CONTACT:mode=LC_CONTACT_HELD;break;
+            case LC_SENSE_SUPPORT_CONTACT:mode=LC_CONTACT_SUPPORT;break;
+            default:mode=0;break;
+            }
+            if(!mode)break;
+            if(!lc_contact_sample(w,mode,expected,&r.contact_sample)){r.status=LC_COMMAND_REJECTED;break;}
+            r.has_contact_sample=true;
+        }
+        r.status=LC_COMMAND_OBSERVED;
         break;
     }
     default:break;

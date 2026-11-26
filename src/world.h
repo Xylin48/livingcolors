@@ -23,6 +23,12 @@ typedef struct { uint8_t r, g, b; } LCColor;
 typedef struct { LCBox shape; LCColor color; } LCSolid;
 
 typedef enum {
+    LC_MATERIAL_UNKNOWN=0, LC_MATERIAL_WOOD=1, LC_MATERIAL_FABRIC=2,
+    LC_MATERIAL_METAL=3, LC_MATERIAL_PAPER=4, LC_MATERIAL_CERAMIC=5,
+    LC_MATERIAL_PLASTIC=6
+} LCMaterial;
+
+typedef enum {
     LC_FURNITURE = 1, LC_DOOR = 2, LC_DEVICE = 3, LC_BOOK = 4,
     LC_CONTAINER = 5, LC_FOOD = 6
 } LCObjectKind;
@@ -44,6 +50,7 @@ typedef struct {
     uint32_t flags;
     uint32_t progress; /* e.g. page position; never inferred from rendering */
     uint32_t container_id,container_slot; /* zero when not stored; one-based slot */
+    LCMaterial material; /* static exterior surface metadata, not a preference */
 } LCObject;
 
 typedef struct {

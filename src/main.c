@@ -119,6 +119,25 @@ int main(void) {
                .kind=LC_COMMAND_USE,.input.use={id,action}},&receipt)==LC_COMMAND_APPLIED)
                 printf("Posture: %u\n",(unsigned)receipt.after_posture);
         }
+        if(IsKeyPressed(KEY_I)){
+            LCCommand sense={.api_version=LC_COMMAND_API_VERSION,.kind=LC_COMMAND_SENSE,
+                             .input.sense={LC_SENSE_ENVIRONMENT,0}};
+            if(lc_execute(&w,&sense,&receipt)==LC_COMMAND_OBSERVED){
+                LCEnvironmentSample s=receipt.environment_sample;
+                printf("Environment: zone=%u, temperature=%.1f C, air=%.2f m/s, light=%.2f\n",
+                       (unsigned)s.zone,s.temperature_c,s.air_speed_mps,s.light_level);
+            }
+        }
+        if(IsKeyPressed(KEY_H)){
+            LCSenseKind mode=w.held_object_id?LC_SENSE_HELD_CONTACT:
+                w.support_id?LC_SENSE_SUPPORT_CONTACT:LC_SENSE_FOCUSED_CONTACT;
+            LCCommand sense={.api_version=LC_COMMAND_API_VERSION,.kind=LC_COMMAND_SENSE,.input.sense={mode,0}};
+            if(lc_execute(&w,&sense,&receipt)==LC_COMMAND_OBSERVED){
+                LCContactSample s=receipt.contact_sample;
+                printf("Contact: object=%u, material=%u, known=%u\n",s.object_id,
+                       (unsigned)s.surface.material,(unsigned)s.surface.known);
+            }
+        }
         if(IsKeyPressed(KEY_F5))printf("Save: %s\n",lc_save(&w,"livingcolors.save")?"OK":"FAILED");
         if(IsKeyPressed(KEY_F9)){
             bool loaded=lc_load(&w,"livingcolors.save");

@@ -32,7 +32,8 @@ bool lc_add_wall(LCWorld *w, LCBox b, LCColor color) {
 }
 bool lc_add_box(LCWorld *w, LCBox b) { return lc_add_wall(w,b,(LCColor){180,166,146}); }
 bool lc_add_object(LCWorld *w, LCObject o) {
-    if (!w || w->object_count>=LC_MAX_OBJECTS || !o.id || o.container_id || o.container_slot || !valid_box(o.shape) ||
+    if (!w || w->object_count>=LC_MAX_OBJECTS || !o.id || o.container_id || o.container_slot || o.material<LC_MATERIAL_UNKNOWN ||
+        o.material>LC_MATERIAL_PLASTIC || !valid_box(o.shape) ||
         !memchr(o.name,'\0',sizeof(o.name))) return false;
     for(size_t i=0;i<w->object_count;i++) if(w->objects[i].id==o.id) return false;
     w->objects[w->object_count++]=o;
@@ -253,5 +254,19 @@ void lc_house(LCWorld *w) {
     object(w,304,"Hall light switch",LC_DEVICE,box(6.0f,4.1f,4.44f,6.14f,4.27f,4.51f),switch_color,switch_flags);
     object(w,305,"Bathroom light switch",LC_DEVICE,box(6.6f,4.1f,7.13f,6.74f,4.27f,7.2f),switch_color,switch_flags);
     object(w,306,"Closet light switch",LC_DEVICE,box(3.37f,4.1f,6.95f,3.44f,4.27f,7.09f),switch_color,switch_flags);
+    /* Material belongs to the definition, not mutable object state or display color.
+     * Single dominant exterior material for now; composite meshes are future work. */
+    for(size_t i=0;i<w->object_count;i++){
+        LCObject *o=&w->objects[i];
+        switch(o->id){
+        case 101:case 201:o->material=LC_MATERIAL_FABRIC;break;
+        case 107:o->material=LC_MATERIAL_METAL;break;
+        case 210:o->material=LC_MATERIAL_PAPER;break;
+        case 207:case 208:case 209:o->material=LC_MATERIAL_CERAMIC;break;
+        case 103:case 204:case 301:case 302:case 303:case 304:case 305:case 306:
+            o->material=LC_MATERIAL_PLASTIC;break;
+        default:o->material=LC_MATERIAL_WOOD;break;
+        }
+    }
     w->player=(LCPose){{6.0f,0,8.8f},0,0};
 }
