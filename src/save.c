@@ -117,6 +117,10 @@ bool lc_load(LCWorld *world, const char *path) {
         LCObject *o=lc_find_object(&staged,staged.held_object_id);
         if(!o||!(o->flags&LC_OBJ_MOVABLE)||!seen[(size_t)(o-staged.objects)])goto invalid;
     }
+    if(staged.support_id){
+        LCObject *support=lc_find_object(&staged,staged.support_id);
+        if(!support||!seen[(size_t)(support-staged.objects)])goto invalid;
+    }
     if(!lc_storage_valid(&staged))goto invalid;
     for(size_t i=0;i<staged.object_count;i++){
         const LCObject *o=&staged.objects[i];

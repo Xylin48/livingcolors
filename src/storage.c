@@ -98,6 +98,8 @@ bool lc_store_held(LCWorld *w,uint32_t id){
                 o->shape.max.z-o->shape.min.z};
     if(!isfinite(size.x)||!isfinite(size.y)||!isfinite(size.z)||
        size.x<=0||size.y<=0||size.z<=0)return false;
+    LCPose camera=lc_body_camera_pose(w);
+    LCVec eye=lc_eye(&camera);
     for(unsigned k=1;k<=lc_container_capacity(p);k++){
         LCBox b;
         if(!lc_container_slot(p,k,&b))continue;
@@ -109,6 +111,12 @@ bool lc_store_held(LCWorld *w,uint32_t id){
         float x=(b.min.x+b.max.x-size.x)*.5f,z=(b.min.z+b.max.z-size.z)*.5f;
         LCBox a={{x,b.min.y,z},{x+size.x,b.min.y+size.y,z+size.z}};
         if(!within(a,b))continue;
+        LCVec center={(a.min.x+a.max.x)*.5f,(a.min.y+a.max.y)*.5f,(a.min.z+a.max.z)*.5f};
+        LCVec d={center.x-eye.x,center.y-eye.y,center.z-eye.z};
+        float distance=hypotf(hypotf(d.x,d.y),d.z);
+        /* A slot must be reachable and unobstructed, not just mathematically empty. */
+        LCHit obstruction;
+        if(distance>1.5f||distance<=.001f||lc_cast(w,eye,d,distance-.0001f,&obstruction))continue;
         o->shape=a;o->container_id=id;o->container_slot=k;w->held_object_id=0;
         return true;
     }

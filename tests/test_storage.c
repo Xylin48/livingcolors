@@ -63,6 +63,21 @@ int main(void){
     assert(!lc_storage_valid(&fresh)&&!lc_save(&fresh,path));
     book->container_slot=1;
     assert(lc_storage_valid(&fresh));
+    /* A second item must occupy a distinct accessible slot, not a remote free one. */
+    fresh.player=(LCPose){{8.95f,3,1.15f},0,0};
+    LCObject other={.id=999,.name="Second reader",.kind=LC_BOOK,
+        .shape={{8.8f,3,1.5f},{9.15f,3.04f,1.8f}},.flags=LC_OBJ_MOVABLE};
+    assert(lc_add_object(&fresh,other));
+    fresh.held_object_id=999; /* unit-test fixture: already holding a second object */
+    aim(&fresh,(LCVec){8.95f,4.35f,.85f});
+    assert(lc_store_held(&fresh,205));
+    LCObject *stored=lc_find_object(&fresh,999);
+    assert(stored&&stored->container_id==205&&stored->container_slot!=1&&lc_storage_valid(&fresh));
+    unsigned slot=stored->container_slot;
+    stored->container_slot=1;
+    assert(!lc_storage_valid(&fresh));
+    stored->container_slot=slot;
+    assert(lc_storage_valid(&fresh));
     assert(remove(path)==0);
     puts("Living Colors: physical storage, occlusion, receipts and persistence tests passed");
     return 0;

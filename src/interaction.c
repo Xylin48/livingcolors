@@ -123,7 +123,7 @@ bool lc_use(LCWorld *w,uint32_t id,LCAction action){
         /* A solid item supporting other objects cannot be removed from under them. */
         for(size_t i=0;i<w->object_count;i++){
             const LCObject *s=&w->objects[i];
-            if(s->id!=id&&!s->container_id&&fabsf(s->shape.min.y-o->shape.max.y)<.001f&&
+            if(s->id!=id&&s->id!=w->held_object_id&&!s->container_id&&fabsf(s->shape.min.y-o->shape.max.y)<.001f&&
                s->shape.min.x<o->shape.max.x&&s->shape.max.x>o->shape.min.x&&
                s->shape.min.z<o->shape.max.z&&s->shape.max.z>o->shape.min.z)return false;
         }
