@@ -7,8 +7,9 @@ static LCObjectState describe(const LCWorld *w,const LCObject *o){
     LCObjectState s={0};
     if(!o)return s;
     s.id=o->id;s.kind=o->kind;s.flags=o->flags;s.progress=o->progress;
-    s.location=w->held_object_id==o->id?LC_LOCATION_HELD:LC_LOCATION_WORLD;
-    if(s.location==LC_LOCATION_WORLD)s.bounds=lc_object_shape(o);
+    s.location=w->held_object_id==o->id?LC_LOCATION_HELD:o->container_id?LC_LOCATION_CONTAINER:LC_LOCATION_WORLD;
+    s.container_id=o->container_id;s.container_slot=o->container_slot;
+    if(s.location!=LC_LOCATION_HELD)s.bounds=lc_object_shape(o);
     return s;
 }
 static bool position_equal(LCVec a,LCVec b){
@@ -59,8 +60,8 @@ LCCommandStatus lc_execute(LCWorld *w,const LCCommand *cmd,LCCommandReceipt *out
         const uint32_t id=cmd->input.use.object_id;
         const LCAction a=cmd->input.use.action;
         if(!id||(a!=LC_ACTION_TOGGLE&&a!=LC_ACTION_READ_NEXT&&a!=LC_ACTION_PICK_UP&&a!=LC_ACTION_PLACE&&
-                 a!=LC_ACTION_SIT&&a!=LC_ACTION_REST&&a!=LC_ACTION_STAND))break;
-        LCObject *o=lc_find_object(w,id);
+                 a!=LC_ACTION_SIT&&a!=LC_ACTION_REST&&a!=LC_ACTION_STAND&&a!=LC_ACTION_STORE))break;
+        LCObject *o=lc_find_object(w,a==LC_ACTION_STORE?w->held_object_id:id);
         if(!o){r.status=LC_COMMAND_REJECTED;break;}
         const LCObjectState before=describe(w,o);
         if(!lc_use(w,id,a)){r.status=LC_COMMAND_REJECTED;break;}

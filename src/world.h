@@ -43,6 +43,7 @@ typedef struct {
     LCColor color;
     uint32_t flags;
     uint32_t progress; /* e.g. page position; never inferred from rendering */
+    uint32_t container_id,container_slot; /* zero when not stored; one-based slot */
 } LCObject;
 
 typedef struct {

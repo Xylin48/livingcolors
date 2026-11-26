@@ -1,5 +1,6 @@
 #include "world.h"
 #include "body.h"
+#include "storage.h"
 
 #include <math.h>
 #include <stdio.h>
@@ -31,7 +32,7 @@ bool lc_add_wall(LCWorld *w, LCBox b, LCColor color) {
 }
 bool lc_add_box(LCWorld *w, LCBox b) { return lc_add_wall(w,b,(LCColor){180,166,146}); }
 bool lc_add_object(LCWorld *w, LCObject o) {
-    if (!w || w->object_count>=LC_MAX_OBJECTS || !o.id || !valid_box(o.shape) ||
+    if (!w || w->object_count>=LC_MAX_OBJECTS || !o.id || o.container_id || o.container_slot || !valid_box(o.shape) ||
         !memchr(o.name,'\0',sizeof(o.name))) return false;
     for(size_t i=0;i<w->object_count;i++) if(w->objects[i].id==o.id) return false;
     w->objects[w->object_count++]=o;
@@ -87,7 +88,7 @@ bool lc_blocked(const LCWorld *w, LCVec p) {
     for(size_t i=0;i<w->count;i++) if(overlaps(w->solids[i].shape,p)) return true;
     for(size_t i=0;i<w->object_count;i++) {
         const LCObject *o=&w->objects[i];
-        if(o->id!=w->held_object_id && (o->flags&LC_OBJ_SOLID) && overlaps(lc_object_shape(o),p)) return true;
+        if(o->id!=w->held_object_id && !o->container_id && (o->flags&LC_OBJ_SOLID) && overlaps(lc_object_shape(o),p)) return true;
     }
     return false;
 }
@@ -134,7 +135,7 @@ static bool nearby(LCVec a, LCBox b, float distance) {
 }
 bool lc_toggle_object(LCWorld *w,uint32_t id,LCVec from) {
     LCObject *o=lc_find_object(w,id);
-    if(!o||id==w->held_object_id||!finite_vec(from)||!(o->flags&LC_OBJ_INTERACTIVE)||
+    if(!o||id==w->held_object_id||o->container_id||!finite_vec(from)||!(o->flags&LC_OBJ_INTERACTIVE)||
        !nearby(from,lc_object_shape(o),1.5f))return false;
     if(o->kind==LC_DOOR) {
         LCObject next=*o; next.flags^=LC_OBJ_OPEN;
@@ -162,14 +163,14 @@ bool lc_placement_clear(const LCWorld *w,uint32_t id,LCBox a,bool all_objects) {
     }
     for(size_t i=0;i<w->object_count;i++){
         const LCObject *o=&w->objects[i];
-        if(o->id==id||o->id==w->held_object_id||(!all_objects&&!(o->flags&LC_OBJ_SOLID)))continue;
+        if(o->id==id||o->id==w->held_object_id||o->container_id||(!all_objects&&!(o->flags&LC_OBJ_SOLID)))continue;
         if(boxes_overlap(a,lc_object_shape(o)))return false;
     }
     return true;
 }
 bool lc_move_object(LCWorld *w,uint32_t id,LCVec from,LCVec target) {
     LCObject *o=lc_find_object(w,id);
-    if(!o||id==w->held_object_id||!finite_vec(from)||!finite_vec(target)||
+    if(!o||id==w->held_object_id||o->container_id||!finite_vec(from)||!finite_vec(target)||
        !(o->flags&LC_OBJ_MOVABLE)||!nearby(from,o->shape,1.5f)||
        hypotf(target.x-from.x,target.z-from.z)>1.6f||
        target.y>LC_UPSTAIRS_Y+2)return false;

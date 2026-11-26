@@ -3,7 +3,7 @@
 
 #include "interaction.h"
 
-#define LC_COMMAND_API_VERSION 2u
+#define LC_COMMAND_API_VERSION 3u
 
 /* A renderer-independent, synchronous world command. Correlation IDs are
  * caller-owned labels, NOT event IDs or replay/deduplication guarantees.
@@ -28,15 +28,15 @@ typedef struct {
 } LCCommand;
 
 typedef enum {
-    LC_LOCATION_NONE=0, LC_LOCATION_WORLD=1, LC_LOCATION_HELD=2
+    LC_LOCATION_NONE=0, LC_LOCATION_WORLD=1, LC_LOCATION_HELD=2, LC_LOCATION_CONTAINER=3
 } LCLocation;
 
 typedef struct {
     uint32_t id;
     LCObjectKind kind;
     LCLocation location;
-    uint32_t flags,progress;
-    LCBox bounds; /* meaningful only for LC_LOCATION_WORLD */
+    uint32_t flags,progress,container_id,container_slot;
+    LCBox bounds; /* meaningful in world or container; zero for held */
 } LCObjectState;
 
 typedef struct {
@@ -50,7 +50,7 @@ typedef struct {
     uint32_t before_held_id,after_held_id;
     LCPosture before_posture,after_posture;
     uint32_t before_support_id,after_support_id;
-    LCObjectState before_object,after_object; /* only on applied object actions */
+    LCObjectState before_object,after_object; /* affected item; store request targets its container */
 } LCCommandReceipt;
 
 /* Receipts report observed in-memory state transitions, not durable Life Log

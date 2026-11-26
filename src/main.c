@@ -4,6 +4,7 @@
 #include "command.h"
 #include "perception.h"
 #include "body.h"
+#include "storage.h"
 #include "raylib.h"
 #include "raymath.h"
 
@@ -35,10 +36,13 @@ static void draw_scene(const LCWorld *w) {
     for(size_t i=0;i<w->count;i++) draw_box(w->solids[i].shape,color(w->solids[i].color));
     for(size_t i=0;i<w->object_count;i++) {
         const LCObject *o=&w->objects[i];
-        if(o->id==w->held_object_id)continue;
+        if(!lc_storage_visible(w,o))continue;
         Color c=color(o->color);
         if(o->kind==LC_DEVICE && (o->flags&LC_OBJ_POWERED))c=(Color){73,132,126,255};
-        draw_box(lc_object_shape(o),c);
+        LCBox panels[LC_CONTAINER_PANELS];
+        size_t n=lc_container_panels(o,panels);
+        if(!n){panels[0]=lc_object_shape(o);n=1;}
+        for(size_t j=0;j<n;j++)draw_box(panels[j],c);
     }
 }
 
@@ -76,6 +80,16 @@ int main(void) {
             if(id&&lc_execute(&w,&(LCCommand){.api_version=LC_COMMAND_API_VERSION,
                 .kind=LC_COMMAND_USE,.input.use={id,action}},&receipt)==LC_COMMAND_APPLIED)
                 puts(receipt.after_held_id?"Picked up object":"Placed object");
+        }
+        if(IsKeyPressed(KEY_T)&&w.held_object_id){
+            LCHit hit;
+            if(lc_focus(&w,1.5f,&hit)){
+                LCObject *o=lc_find_object(&w,hit.object_id);
+                uint32_t id=o?(o->container_id?o->container_id:o->id):0;
+                if(id&&lc_execute(&w,&(LCCommand){.api_version=LC_COMMAND_API_VERSION,
+                    .kind=LC_COMMAND_USE,.input.use={id,LC_ACTION_STORE}},&receipt)==LC_COMMAND_APPLIED)
+                    printf("Stored object %u in %u\n",receipt.after_object.id,id);
+            }
         }
         if(IsKeyPressed(KEY_R)){
             uint32_t id=w.support_id;

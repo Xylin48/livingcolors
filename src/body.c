@@ -43,7 +43,7 @@ static bool supported(const LCWorld *w,const LCObject *o,LCVec p,LCPosture postu
     }
     for(size_t i=0;i<w->object_count;i++){
         const LCObject *other=&w->objects[i];
-        if(other->id!=o->id&&other->id!=w->held_object_id&&
+        if(other->id!=o->id&&other->id!=w->held_object_id&&!other->container_id&&
            intersects(b,lc_object_shape(other)))return false;
     }
     return true;

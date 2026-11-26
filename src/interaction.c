@@ -1,5 +1,6 @@
 #include "interaction.h"
 #include "body.h"
+#include "storage.h"
 #include <math.h>
 #include <stdint.h>
 
@@ -43,9 +44,14 @@ bool lc_cast(const LCWorld *w,LCVec o,LCVec d,float limit,LCHit *out) {
     }
     for(size_t i=0;i<w->object_count;i++){
         const LCObject *obj=&w->objects[i];
-        if(obj->id==w->held_object_id)continue;
-        if(intersect(lc_object_shape(obj),o,d,best,&t)&&(!found||t<best)){
-            best=t;id=obj->id;found=true;
+        if(!lc_storage_visible(w,obj))continue;
+        LCBox panels[LC_CONTAINER_PANELS];
+        size_t n=lc_container_panels(obj,panels);
+        if(!n){panels[0]=lc_object_shape(obj);n=1;}
+        for(size_t j=0;j<n;j++){
+            if(intersect(panels[j],o,d,best,&t)&&(!found||t<best)){
+                best=t;id=obj->id;found=true;
+            }
         }
     }
     if(!found)return false;
@@ -82,7 +88,7 @@ bool lc_place_held(LCWorld *w) {
     bool found=false;
     if(h.object_id){
         LCObject *s=lc_find_object(w,h.object_id);
-        if(s&&(s->flags&LC_OBJ_SOLID)&&s->kind!=LC_DOOR){
+        if(s&&(s->flags&LC_OBJ_SOLID)&&s->kind!=LC_DOOR&&!s->container_id){
             support=lc_object_shape(s);found=on_top(support,h.point);
         }
     }else{
@@ -102,6 +108,7 @@ bool lc_place_held(LCWorld *w) {
     return true;
 }
 bool lc_use(LCWorld *w,uint32_t id,LCAction action){
+    if(action==LC_ACTION_STORE)return lc_store_held(w,id);
     if(action==LC_ACTION_STAND)return w&&id&&id==w->support_id&&lc_body_stand(w);
     if(action==LC_ACTION_SIT||action==LC_ACTION_REST)
         return lc_body_enter(w,id,action==LC_ACTION_SIT?LC_SEATED:LC_RESTING);
@@ -112,16 +119,18 @@ bool lc_use(LCWorld *w,uint32_t id,LCAction action){
     if(!o)return false;
     if(action==LC_ACTION_PICK_UP){
         if(w->held_object_id||!(o->flags&LC_OBJ_MOVABLE))return false;
+        if(o->container_id&&!lc_storage_accessible(w,lc_find_object(w,o->container_id)))return false;
         /* A solid item supporting other objects cannot be removed from under them. */
         for(size_t i=0;i<w->object_count;i++){
             const LCObject *s=&w->objects[i];
-            if(s->id!=id&&fabsf(s->shape.min.y-o->shape.max.y)<.001f&&
+            if(s->id!=id&&!s->container_id&&fabsf(s->shape.min.y-o->shape.max.y)<.001f&&
                s->shape.min.x<o->shape.max.x&&s->shape.max.x>o->shape.min.x&&
                s->shape.min.z<o->shape.max.z&&s->shape.max.z>o->shape.min.z)return false;
         }
-        w->held_object_id=id;
+        w->held_object_id=id;o->container_id=0;o->container_slot=0;
         return true;
     }
+    if(o->container_id&&!lc_storage_accessible(w,lc_find_object(w,o->container_id)))return false;
     if(!(o->flags&LC_OBJ_INTERACTIVE))return false;
     if(action==LC_ACTION_TOGGLE)
         return lc_toggle_object(w,id,lc_body_camera_pose(w).position);

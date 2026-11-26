@@ -1,5 +1,6 @@
 #include "world.h"
 #include "body.h"
+#include "storage.h"
 
 #include <math.h>
 #include <stdio.h>
@@ -11,7 +12,7 @@
 bool lc_save(const LCWorld *world, const char *path) {
     if (!world || !path || !*path || strlen(path)>4000 ||
         world->object_count>LC_MAX_OBJECTS||world->count>LC_MAX_SOLIDS||
-        !lc_body_valid(world)) return false;
+        !lc_body_valid(world)||!lc_storage_valid(world)) return false;
     if(world->held_object_id){
         bool valid=false;
         for(size_t i=0;i<world->object_count;i++)
@@ -25,17 +26,17 @@ bool lc_save(const LCWorld *world, const char *path) {
     memcpy(tmp+n,".tmp",5);
     FILE *f=fopen(tmp,"w");
     if(!f){free(tmp);return false;}
-    int good=fprintf(f,"LIVINGCOLORS 3\n%a %a %a %a %a\n%u\n%u %u %a %a %a\n%zu\n",
+    int good=fprintf(f,"LIVINGCOLORS 4\n%a %a %a %a %a\n%u\n%u %u %a %a %a\n%zu\n",
        (double)world->player.position.x,(double)world->player.position.y,
        (double)world->player.position.z,(double)world->player.yaw,
        (double)world->player.pitch,world->held_object_id,(unsigned)world->posture,world->support_id,
        (double)world->exit_position.x,(double)world->exit_position.y,(double)world->exit_position.z,world->object_count)>0;
     for(size_t i=0;i<world->object_count && good;i++) {
         const LCObject *o=&world->objects[i];
-        good=fprintf(f,"%u %u %u %a %a %a %a %a %a\n",
+        good=fprintf(f,"%u %u %u %a %a %a %a %a %a %u %u\n",
           o->id,o->flags,o->progress,
           (double)o->shape.min.x,(double)o->shape.min.y,(double)o->shape.min.z,
-          (double)o->shape.max.x,(double)o->shape.max.y,(double)o->shape.max.z)>0;
+          (double)o->shape.max.x,(double)o->shape.max.y,(double)o->shape.max.z,o->container_id,o->container_slot)>0;
     }
     if(good)good=fputs("END\n",f)>=0;
     if(fflush(f)!=0)good=0;
@@ -52,7 +53,7 @@ bool lc_load(LCWorld *world, const char *path) {
     LCWorld staged=*world;
     unsigned format;
     char magic[24]={0};
-    if(fscanf(f,"%23s %u",magic,&format)!=2 || strcmp(magic,"LIVINGCOLORS")!=0 || (format!=1 && format!=2 && format!=3))
+    if(fscanf(f,"%23s %u",magic,&format)!=2 || strcmp(magic,"LIVINGCOLORS")!=0 || (format<1 || format>4))
         goto invalid;
     if(fscanf(f,"%f %f %f %f %f",&staged.player.position.x,
         &staged.player.position.y,&staged.player.position.z,
@@ -77,12 +78,13 @@ bool lc_load(LCWorld *world, const char *path) {
     if(fscanf(f,"%zu",&count)!=1 || count>staged.object_count)goto invalid;
     bool seen[LC_MAX_OBJECTS]={0};
     for(size_t i=0;i<count;i++) {
-        unsigned id,flags,progress;
+        unsigned id,flags,progress,container_id=0,container_slot=0;
         LCBox b;
         if(fscanf(f,"%u %u %u %f %f %f %f %f %f",
            &id,&flags,&progress,
            &b.min.x,&b.min.y,&b.min.z,&b.max.x,&b.max.y,&b.max.z)!=9)
             goto invalid;
+        if(format>=4&&fscanf(f,"%u %u",&container_id,&container_slot)!=2)goto invalid;
         size_t ix=0;
         for(;ix<staged.object_count;ix++)if(staged.objects[ix].id==id)break;
         if(ix==staged.object_count || seen[ix] ||
@@ -105,6 +107,7 @@ bool lc_load(LCWorld *world, const char *path) {
                fabsf((b.max.z-b.min.z)-(o->shape.max.z-o->shape.min.z))>.0001f)goto invalid;
         }
         o->shape=b; o->flags=flags; o->progress=progress;
+        o->container_id=container_id;o->container_slot=container_slot;
         seen[ix]=true;
     }
     char ending[8]={0},excess[2]={0};
@@ -114,9 +117,10 @@ bool lc_load(LCWorld *world, const char *path) {
         LCObject *o=lc_find_object(&staged,staged.held_object_id);
         if(!o||!(o->flags&LC_OBJ_MOVABLE)||!seen[(size_t)(o-staged.objects)])goto invalid;
     }
+    if(!lc_storage_valid(&staged))goto invalid;
     for(size_t i=0;i<staged.object_count;i++){
         const LCObject *o=&staged.objects[i];
-        if(o->id!=staged.held_object_id&&(o->flags&LC_OBJ_MOVABLE)&&
+        if(o->id!=staged.held_object_id&&!o->container_id&&(o->flags&LC_OBJ_MOVABLE)&&
            !lc_placement_clear(&staged,o->id,o->shape,false))goto invalid;
     }
     /* Validate player against restored dynamic colliders, not stale states. */
