@@ -16,8 +16,11 @@ int main(void) {
     assert(lc_blocked(&w,(LCVec){0.5f,0,5.6f})); /* sofa */
     assert(lc_blocked(&w,(LCVec){2.0f,0,4.25f})); /* kitchen wall */
     assert(!lc_blocked(&w,(LCVec){9.0f,0,4.25f})); /* kitchen opening */
-    assert(!lc_blocked(&w,(LCVec){4.8f,3,4.35f})); /* bedroom doorway */
+    assert(lc_blocked(&w,(LCVec){4.8f,3,4.35f})); /* closed bedroom door */
+    assert(lc_toggle_object(&w,211,(LCVec){4.8f,3,5.1f}));
+    assert(!lc_blocked(&w,(LCVec){4.8f,3,4.35f})); /* open bedroom door */
     assert(lc_blocked(&w,(LCVec){2.0f,3,4.35f}));
+    assert(lc_find_object(&w,212) && lc_find_object(&w,213) && lc_find_object(&w,214));
     assert(close_to(lc_floor_height(10.6f,9.55f,0),0));
     assert(close_to(lc_floor_height(10.6f,4.45f,3),3));
 
