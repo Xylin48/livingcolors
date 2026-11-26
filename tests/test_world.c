@@ -68,6 +68,7 @@ int main(void) {
     assert(close_to(lc_find_object(&fresh,210)->shape.min.x,2.1f));
     assert(close_to(fresh.player.yaw,.25f));
     assert(lc_find_object(&fresh,110)->flags&LC_OBJ_OPEN);
+    assert(lc_find_object(&fresh,211)->flags&LC_OBJ_OPEN);
     assert(close_to(fresh.player.position.z,9.7f));
     FILE *f=fopen(save,"w");assert(f);
     assert(fputs("broken file\n",f)>=0);assert(fclose(f)==0);
