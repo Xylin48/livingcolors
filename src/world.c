@@ -188,6 +188,10 @@ void lc_house(LCWorld *w) {
     object(w,207,"Bathtub",LC_FURNITURE,box(8.65f,3,7.42f,9.45f,3.7f,9.4f),tile,LC_OBJ_SOLID);
     object(w,208,"Bathroom sink",LC_FURNITURE,box(4.2f,3,8.9f,5.4f,3.88f,9.55f),tile,LC_OBJ_SOLID);
     object(w,209,"Toilet",LC_FURNITURE,box(6.2f,3,9.0f,6.88f,3.72f,9.55f),tile,LC_OBJ_SOLID);
+    object(w,211,"Bedroom door",LC_DOOR,box(4.12f,3,4.33f,5.62f,5.2f,4.41f),wood,LC_OBJ_SOLID|LC_OBJ_INTERACTIVE);
+    object(w,212,"Bathroom door",LC_DOOR,box(5.42f,3,7.02f,6.43f,5.2f,7.10f),wood,LC_OBJ_SOLID|LC_OBJ_INTERACTIVE);
+    object(w,213,"Closet hall door",LC_DOOR,box(3.47f,3,5.76f,3.55f,5.2f,6.83f),wood,LC_OBJ_SOLID|LC_OBJ_INTERACTIVE);
+    object(w,214,"Closet bathroom door",LC_DOOR,box(3.47f,3,7.86f,3.55f,5.2f,8.78f),wood,LC_OBJ_SOLID|LC_OBJ_INTERACTIVE);
     object(w,210,"School reader",LC_BOOK,box(.63f,3.76f,3.10f,1.0f,3.8f,3.4f),(LCColor){212,185,128},LC_OBJ_MOVABLE|LC_OBJ_INTERACTIVE);
     w->player=(LCPose){{6.0f,0,8.8f},0,0};
 }
