@@ -4,7 +4,7 @@ LDLIBS = -lm
 CORE = src/world.c src/save.c src/interaction.c src/command.c src/perception.c src/body.c src/storage.c src/environment.c src/contact.c src/acoustics.c src/scene.c src/frame.c src/session.c
 HEADERS = src/world.h src/interaction.h src/command.h src/perception.h src/body.h src/storage.h src/environment.h src/contact.h src/acoustics.h src/scene.h src/frame.h src/session.h
 
-.PHONY: all test clean viewer
+.PHONY: all test clean viewer headless
 all: test
 
 build:
@@ -39,7 +39,10 @@ build/test_frame: $(CORE) $(HEADERS) tests/test_frame.c | build
 	$(CC) $(CFLAGS) -Isrc $(CORE) tests/test_frame.c -o $@ $(LDLIBS)
 build/test_session: $(CORE) $(HEADERS) tests/test_session.c | build
 	$(CC) $(CFLAGS) -Isrc $(CORE) tests/test_session.c -o $@ $(LDLIBS)
-test: build/test_world build/test_interaction build/test_manipulation build/test_command build/test_perception build/test_body build/test_storage build/test_migration build/test_environment build/test_contact build/test_acoustics build/test_sound_events build/test_frame build/test_session
+build/livingcolors-headless: $(CORE) $(HEADERS) src/headless.c | build
+	$(CC) $(CFLAGS) -Isrc $(CORE) src/headless.c -o $@ $(LDLIBS)
+headless: build/livingcolors-headless
+test: build/test_world build/test_interaction build/test_manipulation build/test_command build/test_perception build/test_body build/test_storage build/test_migration build/test_environment build/test_contact build/test_acoustics build/test_sound_events build/test_frame build/test_session build/livingcolors-headless
 	./build/test_world
 	./build/test_interaction
 	./build/test_manipulation
@@ -54,6 +57,7 @@ test: build/test_world build/test_interaction build/test_manipulation build/test
 	./build/test_sound_events
 	./build/test_frame
 	./build/test_session
+	sh tests/test_headless.sh
 
 # Optional desktop viewer; requires raylib from pkg-config.
 viewer: | build
