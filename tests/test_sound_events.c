@@ -27,6 +27,15 @@ int main(void){
     for(size_t i=0;i<320;i++)assert(!pcm[i]);
     assert(lc_environment_advance(&w,260)&&lc_audio_sample(&w,&s));
     assert(!kind(&s,LC_SOUND_DOOR_CLICK)&&kind(&s,LC_SOUND_DOORWAY_AIR));
+    /* The opened panel has rotated away from the doorway. Look at its
+     * actual current geometry before attempting to close it. */
+    LCBox panel=lc_object_shape(lc_find_object(&w,110));
+    LCVec ear=lc_eye(&w.player);
+    float dx=(panel.min.x+panel.max.x)*.5f-ear.x;
+    float dy=(panel.min.y+panel.max.y)*.5f-ear.y;
+    float dz=(panel.min.z+panel.max.z)*.5f-ear.z;
+    w.player.yaw=atan2f(dx,-dz);
+    w.player.pitch=atan2f(dy,hypotf(dx,dz));
     assert(lc_execute(&w,&toggle,&r)==LC_COMMAND_APPLIED);
     assert(lc_audio_sample(&w,&s)&&kind(&s,LC_SOUND_DOOR_CLICK)&&!kind(&s,LC_SOUND_DOORWAY_AIR));
     const char *path="/tmp/livingcolors_sound_event_test.save";
