@@ -42,6 +42,7 @@ int main(void){
     LCCommand cmd=use(44,204,LC_ACTION_TOGGLE);
     assert(lc_execute(&w,&cmd,&r)==LC_COMMAND_REJECTED);
     assert(!r.before_object.id&&!r.after_object.id);
+    assert(r.requested_action==LC_ACTION_TOGGLE&&r.requested_object_id==204);
     w.player=(LCPose){{4.8f,3,5.1f},0,0};cmd=use(45,211,LC_ACTION_TOGGLE);
     assert(lc_execute(&w,&cmd,&r)==LC_COMMAND_APPLIED);
     assert(r.before_object.id==211&&r.after_object.id==211);

@@ -2,13 +2,13 @@
  * not in this renderer. No model is required to navigate or test the geometry. */
 #include "world.h"
 #include "command.h"
+#include "perception.h"
 #include "raylib.h"
 #include "raymath.h"
 
 #include <math.h>
 #include <stdio.h>
 
-#define LC_PI 3.14159265358979323846f
 
 static Color color(LCColor c) {return (Color){c.r,c.g,c.b,255};}
 static Vector3 center(LCBox b) {
@@ -45,7 +45,7 @@ int main(void) {
     LCWorld w;
     lc_house(&w);
     if(lc_load(&w,"livingcolors.save"))puts("Restored previous Living Colors session");
-    InitWindow(640,480,"Living Colors - standalone world prototype");
+    InitWindow((int)LC_VIEW_WIDTH,(int)LC_VIEW_HEIGHT,"Living Colors - standalone world prototype");
     SetTargetFPS(30);
     DisableCursor();
     while(!WindowShouldClose()) {
@@ -58,7 +58,6 @@ int main(void) {
         float right=(IsKeyDown(KEY_D)?1.0f:0.0f)-(IsKeyDown(KEY_A)?1.0f:0.0f);
         (void)lc_execute(&w,&(LCCommand){.api_version=LC_COMMAND_API_VERSION,
             .kind=LC_COMMAND_WALK,.input.walk={forward,right,dt}},&receipt);
-        const float yaw=w.player.yaw;
         if(IsKeyPressed(KEY_E) || IsKeyPressed(KEY_P)) {
             LCHit hit;
             if(lc_focus(&w,1.5f,&hit) && hit.object_id) {
@@ -79,15 +78,15 @@ int main(void) {
         }
         if(IsKeyPressed(KEY_F5))printf("Save: %s\n",lc_save(&w,"livingcolors.save")?"OK":"FAILED");
         if(IsKeyPressed(KEY_F9))printf("Load: %s\n",lc_load(&w,"livingcolors.save")?"OK":"FAILED");
-        const float cy=cosf(w.player.pitch),sy=sinf(w.player.pitch);
-        LCVec eye=lc_eye(&w.player);
-        Vector3 origin={eye.x,eye.y,eye.z};
+        /* Read the current pose AFTER any load or interaction, not a stale yaw. */
+        LCView view;
+        if(!lc_view(&w.player,&view))continue;
         Camera3D camera={0};
-        camera.position=origin;
-        camera.target=(Vector3){origin.x+sinf(yaw)*cy,origin.y+sy,origin.z-cosf(yaw)*cy};
-        camera.up=(Vector3){0,1,0};
-        /* 125% magnification relative to 60 degree reference field of view. */
-        camera.fovy=2.0f*atanf(tanf((60.0f*LC_PI/180.0f)/2.0f)/1.25f)*180.0f/LC_PI;
+        camera.position=(Vector3){view.origin.x,view.origin.y,view.origin.z};
+        camera.target=(Vector3){view.origin.x+view.forward.x,view.origin.y+view.forward.y,
+                                view.origin.z+view.forward.z};
+        camera.up=(Vector3){view.up.x,view.up.y,view.up.z};
+        camera.fovy=view.vertical_fov_degrees;
         camera.projection=CAMERA_PERSPECTIVE;
         BeginDrawing();
         ClearBackground((Color){137,164,176,255});

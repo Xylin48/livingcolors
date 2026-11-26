@@ -19,7 +19,13 @@ static bool pose_equal(LCPose a,LCPose b){
 LCCommandStatus lc_execute(LCWorld *w,const LCCommand *cmd,LCCommandReceipt *out){
     if(!out)return LC_COMMAND_INVALID;
     LCCommandReceipt r={.api_version=LC_COMMAND_API_VERSION,.status=LC_COMMAND_INVALID};
-    if(cmd){r.correlation_id=cmd->correlation_id;r.kind=cmd->kind;}
+    if(cmd){
+        r.correlation_id=cmd->correlation_id;r.kind=cmd->kind;
+        if(cmd->kind==LC_COMMAND_USE){
+            r.requested_action=cmd->input.use.action;
+            r.requested_object_id=cmd->input.use.object_id;
+        }
+    }
     if(!w||!cmd||cmd->api_version!=LC_COMMAND_API_VERSION||
        lc_blocked(w,w->player.position)||!isfinite(w->player.yaw)||
        !isfinite(w->player.pitch)){

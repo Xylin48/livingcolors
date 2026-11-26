@@ -44,6 +44,8 @@ typedef struct {
     uint64_t correlation_id;
     LCCommandKind kind;
     LCCommandStatus status;
+    LCAction requested_action; /* input, not evidence of success */
+    uint32_t requested_object_id; /* input, not observed target metadata */
     LCPose before_pose,after_pose;
     uint32_t before_held_id,after_held_id;
     LCObjectState before_object,after_object; /* only on applied object actions */
