@@ -24,7 +24,7 @@ static void draw_box(LCBox b,Color c) {
 }
 static void draw_staircase(void) {
     const int steps=16;
-    const float z_start=9.55f,z_end=4.45f;
+    const float z_start=9.55f,z_end=4.70f;
     for(int i=0;i<steps;i++) {
         const float t=(float)(i+1)/steps;
         const float z0=z_start-(z_start-z_end)*(i+1)/steps;
@@ -32,6 +32,7 @@ static void draw_staircase(void) {
         LCBox step={{10.28f,0,z0},{11.72f,LC_UPSTAIRS_Y*t,z1}};
         draw_box(step,(Color){119,78,46,255});
     }
+    draw_box((LCBox){{10.28f,0,4.45f},{11.72f,LC_UPSTAIRS_Y,4.70f}},(Color){119,78,46,255});
 }
 static void draw_scene(const LCWorld *w) {
     DrawPlane((Vector3){6,0,5},(Vector2){12,10},(Color){125,102,78,255});

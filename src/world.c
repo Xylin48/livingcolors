@@ -74,12 +74,12 @@ bool lc_blocked(const LCWorld *w, LCVec p) {
     }
     return false;
 }
-/* Stairs run along the right wall from the entrance (z=9.55) towards the upper hallway (z=4.45).
+/* Stairs run along the right wall from the entrance (z=9.55) towards the upper landing (z=4.70), continuing level to z=4.45.
  * Outside stairs, use the closest floor to prevent instantaneous level changes. */
 float lc_floor_height(float x,float z,float current_y) {
     if(!isfinite(x)||!isfinite(z)||!isfinite(current_y))return NAN;
     if(x>=10.26f && x<=11.73f && z>=4.45f && z<=9.55f)
-        return LC_UPSTAIRS_Y*(9.55f-z)/(9.55f-4.45f);
+        return fminf(LC_UPSTAIRS_Y,LC_UPSTAIRS_Y*(9.55f-z)/(9.55f-4.70f));
     return current_y>=1.5f?LC_UPSTAIRS_Y:0.0f;
 }
 bool lc_move(const LCWorld *w,LCPose *p,float dx,float dz,float dt) {
