@@ -1,6 +1,7 @@
 #include "world.h"
 #include "body.h"
 #include "storage.h"
+#include "acoustics.h"
 #include <inttypes.h>
 
 #include <math.h>
@@ -134,6 +135,7 @@ bool lc_load(LCWorld *world, const char *path) {
     /* Validate player against restored dynamic colliders, not stale states. */
     if(!lc_body_valid(&staged))goto invalid;
     fclose(f);
+    lc_audio_reset_transients(&staged);
     *world=staged;
     return true;
 invalid:

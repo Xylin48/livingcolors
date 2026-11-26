@@ -14,6 +14,7 @@
 #define LC_PLAYER_RADIUS .24f
 #define LC_PLAYER_HEIGHT 1.52f
 #define LC_STAIR_TREADS 17u
+#define LC_SOUND_EVENT_CAPACITY 8u
 
 typedef struct { float x, y, z; } LCVec;
 typedef struct { LCVec min, max; } LCBox;
@@ -53,6 +54,18 @@ typedef struct {
     LCMaterial material; /* static exterior surface metadata, not a preference */
 } LCObject;
 
+typedef enum {
+    LC_SOUND_APPLIANCE_HUM=1, LC_SOUND_CRT_HUM=2, LC_SOUND_DOORWAY_AIR=3,
+    LC_SOUND_FOOTSTEP=4, LC_SOUND_DOOR_CLICK=5, LC_SOUND_SWITCH_CLICK=6,
+    LC_SOUND_CONTAINER_CLICK=7
+} LCSoundKind;
+typedef struct {
+    uint64_t started_ms;
+    uint32_t source_id; /* zero for the body's own footsteps */
+    LCSoundKind kind;
+    LCVec position;
+} LCTransientSound;
+
 typedef struct {
     LCSolid solids[LC_MAX_SOLIDS];
     size_t count;
@@ -64,6 +77,9 @@ typedef struct {
     uint32_t support_id;
     LCVec exit_position; /* previously occupied standing location */
     uint64_t environment_elapsed_ms; /* explicit simulation time, not wall clock */
+    LCTransientSound sound_events[LC_SOUND_EVENT_CAPACITY]; /* ephemeral, not saved */
+    size_t sound_event_count;
+    float footstep_distance_m;
 } LCWorld;
 
 bool lc_add_wall(LCWorld *world, LCBox shape, LCColor color);

@@ -33,7 +33,9 @@ build/test_contact: $(CORE) $(HEADERS) tests/test_contact.c | build
 	$(CC) $(CFLAGS) -Isrc $(CORE) tests/test_contact.c -o $@ $(LDLIBS)
 build/test_acoustics: $(CORE) $(HEADERS) tests/test_acoustics.c | build
 	$(CC) $(CFLAGS) -Isrc $(CORE) tests/test_acoustics.c -o $@ $(LDLIBS)
-test: build/test_world build/test_interaction build/test_manipulation build/test_command build/test_perception build/test_body build/test_storage build/test_migration build/test_environment build/test_contact build/test_acoustics
+build/test_sound_events: $(CORE) $(HEADERS) tests/test_sound_events.c | build
+	$(CC) $(CFLAGS) -Isrc $(CORE) tests/test_sound_events.c -o $@ $(LDLIBS)
+test: build/test_world build/test_interaction build/test_manipulation build/test_command build/test_perception build/test_body build/test_storage build/test_migration build/test_environment build/test_contact build/test_acoustics build/test_sound_events
 	./build/test_world
 	./build/test_interaction
 	./build/test_manipulation
@@ -45,6 +47,7 @@ test: build/test_world build/test_interaction build/test_manipulation build/test
 	./build/test_environment
 	./build/test_contact
 	./build/test_acoustics
+	./build/test_sound_events
 
 # Optional desktop viewer; requires raylib from pkg-config.
 viewer: | build

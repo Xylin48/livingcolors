@@ -106,6 +106,11 @@ LCCommandStatus lc_execute(LCWorld *w,const LCCommand *cmd,LCCommandReceipt *out
     }
     r.after_pose=w->player;r.after_held_id=w->held_object_id;
     r.after_posture=w->posture;r.after_support_id=w->support_id;
+    if(r.status==LC_COMMAND_APPLIED){
+        if(cmd->kind==LC_COMMAND_WALK)lc_audio_note_walk(w,r.before_pose.position);
+        else if(cmd->kind==LC_COMMAND_USE&&cmd->input.use.action==LC_ACTION_TOGGLE)
+            lc_audio_note_toggle(w,lc_find_object(w,cmd->input.use.object_id));
+    }
     *out=r;
     return r.status;
 }

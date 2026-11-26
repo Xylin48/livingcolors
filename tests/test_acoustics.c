@@ -42,7 +42,7 @@ int main(void){
     cmd.api_version=4;assert(lc_execute(&w,&cmd,&r)==LC_COMMAND_INVALID&&!r.has_audio_sample);
     cmd.api_version=LC_COMMAND_API_VERSION;cmd.input.sense.expected_object_id=103;
     assert(lc_execute(&w,&cmd,&r)==LC_COMMAND_INVALID&&!r.has_audio_sample);
-    LCAudioSample tone={.count=1,.cues={{103,LC_SOUND_CRT_HUM,1.5707963f,1,.5f,false}}};
+    LCAudioSample tone={.count=1,.cues={{103,LC_SOUND_CRT_HUM,1.5707963f,1,.5f,false,0,0}}};
     int16_t pcm[320],part[320];
     assert(lc_audio_render(&tone,123,160,pcm,320));
     assert(lc_audio_render(&tone,123,80,part,160));
