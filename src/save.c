@@ -1,0 +1,94 @@
+#include "world.h"
+
+#include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+/* Format is intentionally human-readable and uses stable object IDs, not array offsets.
+ * Only mutable fields are stored. Geometry comes from the current world definition. */
+bool lc_save(const LCWorld *world, const char *path) {
+    if (!world || !path || !*path || strlen(path)>4000) return false;
+    size_t n=strlen(path);
+    char *tmp=malloc(n+5);
+    if(!tmp)return false;
+    memcpy(tmp,path,n);
+    memcpy(tmp+n,".tmp",5);
+    FILE *f=fopen(tmp,"w");
+    if(!f){free(tmp);return false;}
+    int good=fprintf(f,"LIVINGCOLORS 1\n%a %a %a %a %a\n%zu\n",
+       (double)world->player.position.x,(double)world->player.position.y,
+       (double)world->player.position.z,(double)world->player.yaw,
+       (double)world->player.pitch,world->object_count)>0;
+    for(size_t i=0;i<world->object_count && good;i++) {
+        const LCObject *o=&world->objects[i];
+        good=fprintf(f,"%u %u %u %a %a %a %a %a %a\n",
+          o->id,o->flags,o->progress,
+          (double)o->shape.min.x,(double)o->shape.min.y,(double)o->shape.min.z,
+          (double)o->shape.max.x,(double)o->shape.max.y,(double)o->shape.max.z)>0;
+    }
+    if(good)good=fputs("END\n",f)>=0;
+    if(fflush(f)!=0)good=0;
+    if(fclose(f)!=0)good=0;
+    if(good && rename(tmp,path)!=0)good=0;
+    if(!good)(void)remove(tmp);
+    free(tmp);
+    return good!=0;
+}
+
+bool lc_load(LCWorld *world, const char *path) {
+    if(!world || !path)return false;
+    FILE *f=fopen(path,"r");if(!f)return false;
+    LCWorld staged=*world;
+    unsigned format;
+    char magic[24]={0};
+    if(fscanf(f,"%23s %u",magic,&format)!=2 || strcmp(magic,"LIVINGCOLORS")!=0 || format!=1)
+        goto invalid;
+    if(fscanf(f,"%f %f %f %f %f",&staged.player.position.x,
+        &staged.player.position.y,&staged.player.position.z,
+        &staged.player.yaw,&staged.player.pitch)!=5)goto invalid;
+    if(!isfinite(staged.player.yaw)||!isfinite(staged.player.pitch)||
+       fabsf(staged.player.pitch)>1.57f)
+        goto invalid;
+    size_t count=0;
+    if(fscanf(f,"%zu",&count)!=1 || count!=staged.object_count)goto invalid;
+    bool seen[LC_MAX_OBJECTS]={0};
+    for(size_t i=0;i<count;i++) {
+        unsigned id,flags,progress;
+        LCBox b;
+        if(fscanf(f,"%u %u %u %f %f %f %f %f %f",
+           &id,&flags,&progress,
+           &b.min.x,&b.min.y,&b.min.z,&b.max.x,&b.max.y,&b.max.z)!=9)
+            goto invalid;
+        size_t ix=0;
+        for(;ix<staged.object_count;ix++)if(staged.objects[ix].id==id)break;
+        if(ix==staged.object_count || seen[ix] ||
+           !isfinite(b.min.x)||!isfinite(b.min.y)||!isfinite(b.min.z)||
+           !isfinite(b.max.x)||!isfinite(b.max.y)||!isfinite(b.max.z)||
+           b.min.x<0||b.min.y<0||b.min.z<0||
+           b.max.x>LC_WORLD_WIDTH||b.max.y>LC_UPSTAIRS_Y+3 ||b.max.z>LC_WORLD_DEPTH ||
+           b.min.x>=b.max.x||b.min.y>=b.max.y||b.min.z>=b.max.z)
+            goto invalid;
+        LCObject *o=&staged.objects[ix];
+        const unsigned dynamic=LC_OBJ_OPEN|LC_OBJ_POWERED;
+        if((flags & ~dynamic)!=(o->flags & ~dynamic) ||
+           ((o->kind!=LC_DOOR && o->kind!=LC_CONTAINER) && (flags&LC_OBJ_OPEN)) ||
+           (o->kind!=LC_DEVICE && (flags&LC_OBJ_POWERED)))goto invalid;
+        if(!(o->flags&LC_OBJ_MOVABLE) && memcmp(&b,&o->shape,sizeof(b))!=0)
+            goto invalid;
+        o->shape=b; o->flags=flags; o->progress=progress;
+        seen[ix]=true;
+    }
+    char ending[8]={0},excess[2]={0};
+    if(fscanf(f,"%7s",ending)!=1||strcmp(ending,"END")!=0||
+       fscanf(f,"%1s",excess)==1)goto invalid;
+    /* Validate player against restored dynamic colliders, not stale states. */
+    if(lc_blocked(&staged,staged.player.position) ||
+       fabsf(lc_floor_height(staged.player.position.x,staged.player.position.z,
+                              staged.player.position.y)-staged.player.position.y)>.26f)goto invalid;
+    fclose(f);
+    *world=staged;
+    return true;
+invalid:
+    fclose(f);return false;
+}
