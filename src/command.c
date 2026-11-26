@@ -28,7 +28,7 @@ LCCommandStatus lc_execute(LCWorld *w,const LCCommand *cmd,LCCommandReceipt *out
             r.requested_object_id=cmd->input.use.object_id;
         }
     }
-    if(!w||!cmd||cmd->api_version!=LC_COMMAND_API_VERSION||
+    if(!w||!cmd||cmd->api_version<LC_COMMAND_MIN_VERSION||cmd->api_version>LC_COMMAND_API_VERSION||
        !lc_body_valid(w)){
         *out=r;return r.status;
     }
@@ -61,6 +61,7 @@ LCCommandStatus lc_execute(LCWorld *w,const LCCommand *cmd,LCCommandReceipt *out
         const LCAction a=cmd->input.use.action;
         if(!id||(a!=LC_ACTION_TOGGLE&&a!=LC_ACTION_READ_NEXT&&a!=LC_ACTION_PICK_UP&&a!=LC_ACTION_PLACE&&
                  a!=LC_ACTION_SIT&&a!=LC_ACTION_REST&&a!=LC_ACTION_STAND&&a!=LC_ACTION_STORE))break;
+        if((cmd->api_version==1&&a>LC_ACTION_PLACE)||(cmd->api_version==2&&a>LC_ACTION_STAND))break;
         LCObject *o=lc_find_object(w,a==LC_ACTION_STORE?w->held_object_id:id);
         if(!o){r.status=LC_COMMAND_REJECTED;break;}
         const LCObjectState before=describe(w,o);

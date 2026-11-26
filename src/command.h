@@ -4,10 +4,13 @@
 #include "interaction.h"
 
 #define LC_COMMAND_API_VERSION 3u
+#define LC_COMMAND_MIN_VERSION 1u
 
 /* A renderer-independent, synchronous world command. Correlation IDs are
  * caller-owned labels, NOT event IDs or replay/deduplication guarantees.
- * One world owner serializes calls. No external network or model required. */
+ * One world owner serializes calls. No external network or model required.
+ * Recompiled clients may request earlier semantic versions (1–3); this is
+ * not a stable binary ABI. Receipts always use the current struct version. */
 typedef enum {
     LC_COMMAND_WALK=1, LC_COMMAND_LOOK=2, LC_COMMAND_USE=3
 } LCCommandKind;

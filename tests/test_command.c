@@ -28,7 +28,15 @@ int main(void){
     assert(r.before_pose.position.z==r.after_pose.position.z);
     walk.input.walk.seconds=1;walk.api_version=99;
     assert(lc_execute(&w,&walk,&r)==LC_COMMAND_INVALID);
-    walk.api_version=LC_COMMAND_API_VERSION;
+    walk.api_version=1;walk.input.walk.seconds=0;
+    assert(lc_execute(&w,&walk,&r)==LC_COMMAND_UNCHANGED&&r.api_version==LC_COMMAND_API_VERSION);
+    walk.api_version=2;
+    assert(lc_execute(&w,&walk,&r)==LC_COMMAND_UNCHANGED);
+    walk.api_version=LC_COMMAND_API_VERSION;walk.input.walk.seconds=1;
+    LCCommand unsupported=use(101,205,LC_ACTION_STORE);unsupported.api_version=2;
+    assert(lc_execute(&w,&unsupported,&r)==LC_COMMAND_INVALID);
+    unsupported=use(102,101,LC_ACTION_SIT);unsupported.api_version=1;
+    assert(lc_execute(&w,&unsupported,&r)==LC_COMMAND_INVALID);
     w.player=(LCPose){{2,0,5},0,0};
     assert(lc_execute(&w,&walk,&r)==LC_COMMAND_APPLIED); /* partial travel */
     assert(lc_execute(&w,&walk,&r)==LC_COMMAND_UNCHANGED); /* wall */

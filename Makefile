@@ -25,7 +25,9 @@ build/test_body: $(CORE) $(HEADERS) tests/test_body.c | build
 	$(CC) $(CFLAGS) -Isrc $(CORE) tests/test_body.c -o $@ $(LDLIBS)
 build/test_storage: $(CORE) $(HEADERS) tests/test_storage.c | build
 	$(CC) $(CFLAGS) -Isrc $(CORE) tests/test_storage.c -o $@ $(LDLIBS)
-test: build/test_world build/test_interaction build/test_manipulation build/test_command build/test_perception build/test_body build/test_storage
+build/test_migration: $(CORE) $(HEADERS) tests/test_migration.c | build
+	$(CC) $(CFLAGS) -Isrc $(CORE) tests/test_migration.c -o $@ $(LDLIBS)
+test: build/test_world build/test_interaction build/test_manipulation build/test_command build/test_perception build/test_body build/test_storage build/test_migration
 	./build/test_world
 	./build/test_interaction
 	./build/test_manipulation
@@ -33,6 +35,7 @@ test: build/test_world build/test_interaction build/test_manipulation build/test
 	./build/test_perception
 	./build/test_body
 	./build/test_storage
+	./build/test_migration
 
 # Optional desktop viewer; requires raylib from pkg-config.
 viewer: | build
