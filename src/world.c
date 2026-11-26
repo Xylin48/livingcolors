@@ -118,7 +118,7 @@ static bool nearby(LCVec a, LCBox b, float distance) {
 bool lc_toggle_object(LCWorld *w,uint32_t id,LCVec from) {
     LCObject *o=lc_find_object(w,id);
     if(!o||!finite_vec(from)||!(o->flags&LC_OBJ_INTERACTIVE)||
-       !nearby(from,o->shape,1.5f))return false;
+       !nearby(from,lc_object_shape(o),1.5f))return false;
     if(o->kind==LC_DOOR) {
         LCObject next=*o; next.flags^=LC_OBJ_OPEN;
         if(overlaps(lc_object_shape(&next),w->player.position))return false;

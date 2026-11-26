@@ -22,11 +22,11 @@ make viewer
 ./build/livingcolors
 ```
 
-Use **WASD** to walk, **mouse** to turn/look, **E** to toggle a nearby interactive device or door, **P** to advance the school reader's stored progress (development shortcut), **F5** to save, **F9** to load, **ESC** to quit. State is saved automatically to `livingcolors.save` on normal exit. Terminal output reports interactions; the view has no HUD.
+Use **WASD** to walk, **mouse** to turn/look, **E** to toggle the focused, reachable interactive device or door, **P** to advance the focused, reachable school reader's stored progress (development shortcut), **F5** to save, **F9** to load, **ESC** to quit. State is saved automatically to `livingcolors.save` on normal exit. Terminal output reports interactions; the view has no HUD.
 
 ## Important limitations
 
-This is a foundation, **not a finished Living Colors release**. Geometry dimensions and exact staircase landing alignments still need refinement. The renderer uses procedural boxes and flat colors rather than complete late-1990s textures. Outdoor streets and stores, hands and detailed manipulation, camera-to-R2 sensory integration, physics for falling items, time systems, object inventories, real PDF page reading, media playback, actual device operation and Android phone features are not yet integrated. Book progress is a persisted integer; it is **not** PDF parsing. The open front/back doors do not yet lead outside the world boundary. Device toggling is proximity-based, not a complete vision/line-of-sight interaction model.
+This is a foundation, **not a finished Living Colors release**. Geometry dimensions and exact staircase landing alignments still need refinement. The renderer uses procedural boxes and flat colors rather than complete late-1990s textures. Outdoor streets and stores, hands and detailed manipulation, camera-to-R2 sensory integration, physics for falling items, time systems, object inventories, real PDF page reading, media playback, actual device operation and Android phone features are not yet integrated. Book progress is a persisted integer; it is **not** PDF parsing. The open front/back doors do not yet lead outside the world boundary. Viewer toggling checks line of sight and reach. Legacy low-level functions are retained, but subsystem clients should use the interaction API for gaze-checked actions. Stair treads are still visual geometry above a continuous movement surface.
 
 ## Architecture
 

@@ -61,19 +61,8 @@ bool lc_use(LCWorld *w,uint32_t id,LCAction action){
     if(!w||!id||lc_blocked(w,w->player.position)||!lc_focus(w,1.5f,&hit)||hit.object_id!=id)return false;
     LCObject *o=lc_find_object(w,id);
     if(!o||!(o->flags&LC_OBJ_INTERACTIVE))return false;
-    if(action==LC_ACTION_TOGGLE) {
-        /* Legacy toggle uses the closed door bounds for reach. Open panels may
-         * extend away from them; still require the actual panel to be in reach. */
-        if(o->kind==LC_DOOR&&(o->flags&LC_OBJ_OPEN)){
-            LCObject closed=*o;closed.flags&=~LC_OBJ_OPEN;
-            LCBox b=closed.shape; LCVec p=w->player.position;
-            if(p.x+LC_PLAYER_RADIUS>b.min.x&&p.x-LC_PLAYER_RADIUS<b.max.x&&
-               p.y+LC_PLAYER_HEIGHT>b.min.y&&p.y<b.max.y&&
-               p.z+LC_PLAYER_RADIUS>b.min.z&&p.z-LC_PLAYER_RADIUS<b.max.z)return false;
-            o->flags&=~LC_OBJ_OPEN;return true;
-        }
+    if(action==LC_ACTION_TOGGLE)
         return lc_toggle_object(w,id,w->player.position);
-    }
     if(action==LC_ACTION_READ_NEXT && o->kind==LC_BOOK && o->progress<UINT32_MAX){
         o->progress++;return true;
     }
