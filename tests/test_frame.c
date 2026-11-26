@@ -41,6 +41,19 @@ int main(void){
     lc_house(&w);w.player=(LCPose){{4.8f,3,5.1f},0,.25f};
     assert(lc_frame_render(&w,rgb,sizeof(rgb),depth,LC_FRAME_PIXELS));
     for(unsigned y=30;y<450;y+=43)for(unsigned x=31;x<610;x+=53)compare_depth(&w,x,y);
+    /* A resting body sees a physical bedroom ceiling, never open sky. */
+    w.player=(LCPose){{2.9f,3,1.5f},0,0};
+    LCVec e=lc_eye(&w.player);
+    float dx=2-e.x,dy=3.65f-e.y,dz=1.5f-e.z;
+    w.player.yaw=atan2f(dx,-dz);w.player.pitch=atan2f(dy,hypotf(dx,dz));
+    assert(lc_body_enter(&w,201,LC_RESTING));
+    assert(lc_frame_render(&w,rgb,sizeof(rgb),depth,LC_FRAME_PIXELS));
+    compare_depth(&w,320,240);
+    LCHit roof;
+    assert(lc_focus(&w,5,&roof)&&roof.object_id==0&&fabsf(roof.point.y-5.82f)<.001f);
+    size_t i=pixel(320,240);
+    LCColor sky=lc_scene_sky(&w);
+    assert(depth[i]>0&&(rgb[3*i]!=sky.r||rgb[3*i+1]!=sky.g||rgb[3*i+2]!=sky.b));
     assert(w.environment_elapsed_ms==0);
     puts("Living Colors: headless RGB rendering, depth agreement, lighting and occlusion tests passed");
     return 0;

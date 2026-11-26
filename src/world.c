@@ -218,6 +218,15 @@ void lc_house(LCWorld *w) {
     wall(w,3.57f,3,7.0f,5.4f,5.82f,7.12f,tile);
     wall(w,6.45f,3,7.0f,9.5f,5.82f,7.12f,tile);
     wall(w,9.5f,3,7.0f,9.62f,5.82f,9.87f,tile);
+    /* Continuous upper ceiling, divided along lighting-zone boundaries.
+     * Geometry participates in sight, sound and capture, not only decoration. */
+    const LCColor ceiling={223,215,199};
+    wall(w,0,5.82f,0,12,6,4.43f,ceiling);
+    wall(w,0,5.82f,4.43f,12,6,5.22f,ceiling);
+    wall(w,0,5.82f,5.22f,3.57f,6,10,ceiling);
+    wall(w,3.57f,5.82f,5.22f,12,6,7.12f,ceiling);
+    wall(w,3.57f,5.82f,7.12f,9.62f,6,10,ceiling);
+    wall(w,9.62f,5.82f,7.12f,12,6,10,ceiling);
     /* Key ground floor furniture */
     object(w,101,"Living room sofa",LC_FURNITURE,box(.5f,0,5.2f,1.55f,.8f,8.6f),cloth,LC_OBJ_SOLID);
     object(w,102,"Coffee table",LC_FURNITURE,box(2.8f,0,6.1f,4.5f,.48f,7.6f),wood,LC_OBJ_SOLID);
