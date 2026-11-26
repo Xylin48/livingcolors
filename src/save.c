@@ -61,8 +61,8 @@ bool lc_load(LCWorld *world, const char *path) {
     staged.held_object_id=0;
     if(format==2 && fscanf(f,"%u",&staged.held_object_id)!=1)goto invalid;
     size_t count=0;
-    /* Older snapshots may predate additive object definitions. Retain defaults for
-     * new IDs; unknown and duplicate IDs still fail. */
+    /* Older snapshots may predate additive object definitions. Retain caller-supplied state for
+     * new IDs (fresh definitions if the caller initialized a fresh world); unknown and duplicate IDs still fail. */
     if(fscanf(f,"%zu",&count)!=1 || count>staged.object_count)goto invalid;
     bool seen[LC_MAX_OBJECTS]={0};
     for(size_t i=0;i<count;i++) {

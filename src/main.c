@@ -1,7 +1,7 @@
 /* Standalone manual inspection viewer. The authoritative world state lives in world.c,
  * not in this renderer. No model is required to navigate or test the geometry. */
 #include "world.h"
-#include "interaction.h"
+#include "command.h"
 #include "raylib.h"
 #include "raymath.h"
 
@@ -51,26 +51,31 @@ int main(void) {
     while(!WindowShouldClose()) {
         float dt=fminf(GetFrameTime(),.05f);
         Vector2 mouse=GetMouseDelta();
-        (void)lc_look(&w,mouse.x*.0025f,-mouse.y*.0025f);
+        LCCommandReceipt receipt;
+        (void)lc_execute(&w,&(LCCommand){.api_version=LC_COMMAND_API_VERSION,
+            .kind=LC_COMMAND_LOOK,.input.look={mouse.x*.0025f,-mouse.y*.0025f}},&receipt);
         float forward=(IsKeyDown(KEY_W)?1.0f:0.0f)-(IsKeyDown(KEY_S)?1.0f:0.0f);
         float right=(IsKeyDown(KEY_D)?1.0f:0.0f)-(IsKeyDown(KEY_A)?1.0f:0.0f);
+        (void)lc_execute(&w,&(LCCommand){.api_version=LC_COMMAND_API_VERSION,
+            .kind=LC_COMMAND_WALK,.input.walk={forward,right,dt}},&receipt);
         const float yaw=w.player.yaw;
-        const float dx=right*cosf(yaw)+forward*sinf(yaw);
-        const float dz=right*sinf(yaw)-forward*cosf(yaw);
-        (void)lc_move(&w,&w.player,dx,dz,dt);
         if(IsKeyPressed(KEY_E) || IsKeyPressed(KEY_P)) {
             LCHit hit;
             if(lc_focus(&w,1.5f,&hit) && hit.object_id) {
                 LCAction action=IsKeyPressed(KEY_E)?LC_ACTION_TOGGLE:LC_ACTION_READ_NEXT;
-                if(lc_use(&w,hit.object_id,action))
-                    printf("Interacted with object %u\n",hit.object_id);
+                if(lc_execute(&w,&(LCCommand){.api_version=LC_COMMAND_API_VERSION,
+                    .kind=LC_COMMAND_USE,.input.use={hit.object_id,action}},&receipt)==LC_COMMAND_APPLIED)
+                    printf("Interacted with object %u\n",receipt.after_object.id);
             }
         }
         if(IsKeyPressed(KEY_G)){
             LCHit hit;
-            bool done=w.held_object_id?lc_place_held(&w):
-                (lc_focus(&w,1.5f,&hit)&&hit.object_id&&lc_use(&w,hit.object_id,LC_ACTION_PICK_UP));
-            if(done)puts(w.held_object_id?"Picked up object":"Placed object");
+            uint32_t id=w.held_object_id;
+            LCAction action=id?LC_ACTION_PLACE:LC_ACTION_PICK_UP;
+            if(!id&&lc_focus(&w,1.5f,&hit))id=hit.object_id;
+            if(id&&lc_execute(&w,&(LCCommand){.api_version=LC_COMMAND_API_VERSION,
+                .kind=LC_COMMAND_USE,.input.use={id,action}},&receipt)==LC_COMMAND_APPLIED)
+                puts(receipt.after_held_id?"Picked up object":"Placed object");
         }
         if(IsKeyPressed(KEY_F5))printf("Save: %s\n",lc_save(&w,"livingcolors.save")?"OK":"FAILED");
         if(IsKeyPressed(KEY_F9))printf("Load: %s\n",lc_load(&w,"livingcolors.save")?"OK":"FAILED");
