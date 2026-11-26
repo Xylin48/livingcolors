@@ -1,0 +1,1199 @@
+=======================================================================
+A SECOND LETTER TO THE FUTURE DEVELOPERS OF R2-3PO
+DEVELOPMENT, EXPERIENCE, AND THE ARCHITECTURE OF CONTINUING LEARNING
+=======================================================================
+25 November 2026 | Companion research memorandum | Revision 1.0
+
+Dear future developers of R2-3PO,
+
+I write in continuation of the first memorandum, Neuroscience, Embodied
+Cognition, and the Continuity of a Software Mind. The first letter began
+with the user's guiding image of two complementary parts forming one
+internally connected compound. It established the value of distinct but
+interacting responsibilities, embodied perception, episodic evidence,
+reflection, reinforcement and a coherent state. This letter asks what
+we can do once those foundations work. How can a system change in useful,
+measurable ways through its own history, while retaining continuity across
+software changes? How can the same house become familiar, the same book
+become easier to read, and a mistaken prediction become an opportunity
+for learning rather than an excuse for a fictional memory?
+
+I have reopened the first letter, including its Experiences schema,
+existing subsystem interfaces, critical review and implementation order.
+This is a supplement, not a replacement. In particular, the original
+constraint remains: Living Colors is the immediate priority, its house
+comes before the neighborhood, and the world must actually work before
+advanced cognitive mechanisms are connected to it. Do not convert this
+research into a mandatory list of features for the current branch. Do not
+claim a feature exists because it appears in either letter.
+
+My central proposal is that a useful form of software development within
+R2 should be distinguishable from software development performed by us.
+The latter adds capabilities, changes implementation and repairs defects.
+The former changes what R2 knows, predicts, remembers and can accomplish
+with capabilities already provided. We should design those mechanisms to
+make progress visible in evidence, not in claims about a simulated age,
+consciousness, or the sophistication of a generated personality.
+
+This document contains additional literature findings, engineering
+hypotheses and original proposals. The literature review uses academic
+abstracts and accessible review material, not an exhaustive examination of
+primary experimental datasets. The source list is independent of Volume I.
+References in square brackets beginning with II refer to that list. The
+technical interface sketches are conceptual, not tested implementations.
+The current repository was not re-audited for this letter; verify it before
+using any names or assumptions from the first volume.
+
+CONTENTS
+  01. What it would mean for R2 to develop
+  02. Competence without pretending to have a biological age
+  03. Building a developmental learning loop
+  04. Learning without asking the language model to think
+  05. Attention, executive control and interruptions
+  06. The architecture of a remembered episode
+  07. Reconstruction, reconsolidation and correction
+  08. Associations and cognitive maps beyond geometry
+  09. Curiosity as an information-seeking process
+  10. Reward, habits and contextual preferences
+  11. Rest, offline work and selective consolidation
+  12. Prospective memory and unfinished intentions
+  13. Procedural memory and the acquisition of skills
+  14. A continuous self without an invented autobiography
+  15. The architecture of bounded emergence
+  16. Original proposals: four experiments with long-term value
+  17. Integration and resource management
+  18. The experimental program and acceptance criteria
+  19. Editorial reconsideration: what to discard or defer
+  20. References and closing letter
+
+01. WHAT IT WOULD MEAN FOR R2 TO DEVELOP
+----------------------------------------
+The phrase 'human brain' describes a biological organ with a developmental
+history, bodily regulation, living tissue, adaptation and immense parallel
+computation. We cannot reproduce that organ merely by assigning English
+names to services. Nor do we have a reliable measurement of subjective
+experience in a software agent. Nevertheless, cognition offers measurable
+functional questions. Can an agent distinguish an old event from a new
+observation? Can it use an earlier failure to choose a different approach?
+Can it generalize to a related situation while retaining the difference
+between what it has tried and what it expects? Can it learn in a way that
+does not require its developer to prewrite every resulting belief?
+
+Johnson's interactive specialization framework treats developing functional
+organization in terms of interactions between regions, rather than a
+collection of isolated functions simply switching on as they mature [II1].
+It is a theoretical framework supported by developmental imaging work, not
+a prescription for computer architecture. The engineering inference I draw
+is that improvement may occur in relationships between existing services:
+a perceptual result becomes easier to classify because experience supplies
+context; a familiar action requires fewer deliberative steps because its
+constraints have become known; the memory system retrieves a related fact
+before a task fails. A service's internal accuracy and the quality of its
+communication both matter.
+
+Consider three levels of change. At the first level, a developer implements
+book reading. That is a software capability. At the second, R2 learns
+which books are available, where a particular book is stored, and how to
+resume its current page. That is acquired knowledge and skill. At the
+third, it learns that some reading tasks benefit from revisiting an earlier
+paragraph, and that a new unfamiliar book may require more effort than a
+familiar one. That is a strategy learned from experience. An improvement
+at the third level should not require changing the executable for every
+book. The capability provides the means; the recorded history provides
+some of the information needed to choose how to use it.
+
+We must measure each level separately. A broken page-turning command is
+not evidence of insufficient learning. A hallucinated page number is not a
+successful demonstration of procedural memory. A new command delivered in
+an update is not evidence that R2 discovered it autonomously. Make the
+origin of each acquired fact or skill explicit: installed, observed,
+reported, demonstrated, inferred, or learned through recorded practice.
+
+I suggest a working definition of functional development for this project:
+a reproducible change in performance, selection, understanding or
+calibrated prediction attributable to accumulated valid experience and
+retained across ordinary restarts. This is intentionally narrower than a
+claim that a software system grows like a child. It is broad enough to
+include perceptual familiarity, navigation, reading, music, physical tasks,
+conversations, games and problem solving. It is also falsifiable: compare
+the same system before and after the relevant experiences, with a fixed
+version of the executable and a suitable control.
+
+02. COMPETENCE WITHOUT PRETENDING TO HAVE A BIOLOGICAL AGE
+---------------------------------------------------------
+The user's School Update can offer an ordered curriculum and a period
+setting without turning school grades into a universal intelligence score.
+The LLM already has pretrained linguistic knowledge. R2's firsthand
+records may be sparse while its base model can describe a complex subject.
+Neither fact should be hidden. Separate model-supplied knowledge from
+learned facts about its own world and verified performance on activities.
+
+A competence record should describe a task family, conditions, number of
+independent attempts, evidence of success and failure, recent reliability,
+assistance level, and transfer to unfamiliar instances. It should include
+uncertainty when evidence is weak. The record belongs with a learning or
+skill representation, not as an arbitrary mutation to R2's declared
+identity. A label such as 'can locate the bedroom bookshelf' is too broad
+unless we know which house version, where the task began, whether a route
+was supplied, and whether the shelf was actually observed.
+
+Example: on the first attempt R2 is shown how to walk from the living room
+to its bedroom. On the second it follows a previously learned sequence.
+On the third it starts near the kitchen instead. On the fourth a path is
+obstructed by a movable chair. The four cases are not interchangeable.
+Success on a rehearsed route demonstrates retention of that route, whereas
+successful adaptation to an obstruction demonstrates a different property.
+The competence representation should preserve that distinction. If a world
+geometry update changes the stair opening, an old successful route may
+remain a valuable memory without remaining an executable navigation plan.
+
+Schoolwork deserves the same treatment. Completion is not identical to
+comprehension, and remembering a particular answer is not identical to
+understanding a concept. A small locally curated set of practice tasks can
+measure transfer: read a new short passage, answer questions grounded in
+that passage, distinguish explicitly stated facts from inferences, and
+later recall the relevant information. Do not award knowledge based solely
+on the model saying that it understands. Do not attach a single global
+number to all competence. Retain examples and the context in which they
+were demonstrated.
+
+There is a possible long-term learning curve, but not a guaranteed one.
+A software update might improve an activity abruptly. A model change might
+make a particular task harder. A newly acquired fact could expose an old
+misconception. We should preserve these discontinuities rather than force
+a narrative of uninterrupted progress. The resulting history will be more
+valuable precisely because it is not prewritten.
+
+03. BUILDING A DEVELOPMENTAL LEARNING LOOP
+------------------------------------------
+The initial loop should be small enough to inspect from end to end:
+
+  committed action / observation -> episode -> outcome assessment
+  -> candidate lesson -> validation -> retained knowledge or skill
+  -> later choice -> new committed observation.
+
+This extends the first letter's recurrent architecture without requiring
+another universal coordinator to duplicate Reality, Life Log, Diary or
+Choice Lab. A lesson candidate is a proposal, not a new historical fact.
+The candidate contains an evidence set, a scope, a proposed conclusion,
+a method of confirmation, a confidence or uncertainty statement, and a
+relationship to earlier knowledge. The owner of the destination knowledge
+validates it before making it available as an established belief.
+
+An illustrative case: R2 tries to read on the couch while the television is
+playing and later records difficulty following the text. The evidence is
+compatible with several explanations: unfamiliar vocabulary, television
+sound, tiredness or the difficulty of the passage. It does not yet justify
+a universal claim that the couch is bad for reading. A more careful lesson
+is conditional: for this episode, reading with background sound coincided
+with reduced performance. A subsequent session in a quieter room could
+provide further evidence. If the two passages differ substantially, that
+comparison still does not isolate the cause. The architecture should permit
+modest conclusions and retain counterexamples, rather than generate a
+confident personality trait after a single episode.
+
+A lesson can affect several downstream systems without creating duplicate
+learning events. The memory service may retain the conditional proposition;
+Choice Lab may consult it when choosing a reading setting; Reward may use
+an already verified outcome associated with the episode; Diary may later
+compare the two situations. Each consumer retains its own responsibility.
+A repeated delivery of the same lesson cannot be counted as another
+experience. A consumer that is unavailable receives the original logical
+operation later, not a fictional replacement event.
+
+This suggests a useful design rule: a change in learned state must be
+explainable by a finite chain of committed evidence and transformations.
+The chain need not be exposed as a huge text prompt. It must be retrievable
+for testing and diagnosis. A short user-facing explanation may cite only
+the most relevant episode, while the engineering record preserves the full
+provenance. If a lesson is challenged, we should be able to locate the
+input, the inference, the method version, and the resulting change.
+
+04. LEARNING WITHOUT ASKING THE LANGUAGE MODEL TO THINK
+-------------------------------------------------------
+Human learning includes both explicit and incidental processes. Reviews
+of statistical learning discuss automatic as well as attention-dependent
+learning, and distinguish potentially different representational mechanisms
+rather than settling on one universal algorithm [II2, II3]. The implication
+for R2 is not to imitate a subconscious person in prose. It is to identify
+useful calculations that can occur independently of a language-generation
+request, and to connect their results to explicit reasoning when needed.
+
+A simple estimator can track how often a known device responds to a valid
+command under particular conditions. A route learner can summarize observed
+transition times. A familiarity estimator can count distinct, verified
+encounters with an object. A reading component can compute progress and
+recognize repeated difficulty with a local task type. A perceptual index
+can store embeddings if they are available, or use symbolic features and
+full-text search initially. None requires the text model to narrate the
+calculation. A diary may later interpret a selected result, but it need not
+create the numerical evidence itself.
+
+Separate fast processing from slower interpretation. World ticks maintain
+physics and state. Acquisition collects frames or samples at appropriate
+rates. Event detection emits meaningful changes. Associative indexing and
+statistics update at a coarser rate. Deliberation and reflection occur when
+needed, not once for every frame. The rendering cadence must never become
+the rate at which experience entries multiply. One minute of a stable
+scene is not automatically thousands of distinct experiences.
+
+A compact example: an implicit transition estimator stores counts of
+observed actions and their confirmed outcomes in a particular context.
+For an eligible context c and action a, a probability estimate of outcome
+b could be a smoothed count (n(c,a,b)+alpha) divided by the total counts
+plus the smoothing mass. This is an ordinary software estimator, not a
+claim about neural firing. It may be useful for ranking hypotheses, but it
+cannot authorize an action or override the actual world result. If samples
+are scarce or stale, report that explicitly. A failed action may reflect
+invalid input rather than a property of the device; include failure type.
+
+An especially promising distinction is between familiarity and recollection.
+R2 may recognize that a title or sound has occurred before without being
+able to retrieve the episode immediately. A familiarity score could serve
+as a retrieval hint, not as evidence that a specific event happened. If no
+supporting event is found, it must not invent the circumstances. This
+small mechanism would support more nuanced behavior: 'that seems familiar'
+and 'I remember reading this yesterday' should have different evidential
+requirements.
+
+There is also a resource argument. On the described host, text inference
+and vision inference are expensive relative to simple local computation.
+Statistical updates, navigation and persistence should not occupy the model
+queue unnecessarily. Use deterministic functions for precise operations;
+use model inference where semantic interpretation is actually valuable.
+A faster model call is not a substitute for getting the source, lifetime
+or ownership of the data correct.
+
+05. ATTENTION, EXECUTIVE CONTROL AND INTERRUPTIONS
+--------------------------------------------------
+Cognitive control research concerns both context-dependent behavior
+selection and monitoring ongoing behavior for adjustment [II4]. The
+expected-value-of-control model proposes a tradeoff between payoff and the
+amount and cost of control [II5]. It is a normative account, not proof
+that one brain region literally runs a software priority queue.
+
+We can borrow the distinction between choosing an activity and choosing
+how much deliberation it needs. Not every familiar task requires a long
+plan. Not every unfamiliar task can be solved by guessing. An executive
+scheduler might consider the urgency of an authorized user request, the
+state of a current task, whether an operation is interruptible, the value
+of additional information, and the cost of occupying a limited inference
+worker. The priority of computation should remain separate from the reward
+value of the modeled activity. A low-reward but necessary maintenance task
+must not become impossible to schedule.
+
+A useful task lifecycle is proposed, active, paused, completed, failed or
+cancelled. A task has an identity and a checkpoint that describes its
+actual state, not merely a textual promise. If R2 is turning a page when
+a conversation arrives, the page operation either commits or does not.
+The conversation does not cause a second page turn on resumption. If an
+object is in transit, the world records where it actually is. If a task is
+abandoned, later retrieval does not present its planned outcome as achieved.
+The original first letter's interruptibility requirement is central here.
+
+The existing follow-up-message problems make this design especially
+important. New asynchronous workers cannot become an alternate answer path
+that discards the current turn, guesses at missing text, or replays a stale
+prompt. All model work needs a valid job identity, an owner, a captured
+input revision and a delivery rule. A result that arrives after the relevant
+conversation has advanced must not be presented as the newest response.
+Repair allocation and ownership defects at their source. Do not use a
+second generic response generator to conceal a failed first path.
+
+One experimental measure of attention is the cost of interruption: time
+to respond to a new message, correctness of the interrupted action's state,
+and correctness of resuming the old intention. Compare a background job
+running during conversation with an otherwise identical idle baseline.
+Report both response latency and whether the newest message and its
+required context were preserved. A cognitive architecture that improves
+reflective output but loses user messages has failed an essential test.
+
+06. THE ARCHITECTURE OF A REMEMBERED EPISODE
+---------------------------------------------
+A record of an event is not identical to a recollection of that event.
+The self-memory framework of Conway and Pleydell-Pearce treats personal
+remembering as a constructive process drawing on organized knowledge and
+current goals [II6]. It offers an interesting analogy to R2's existing
+ability to combine a retrieved event with a question, a current task and
+other stored knowledge. We must preserve the difference between a source
+record and the narrative generated from it. In software, unlike a human
+brain, we can deliberately preserve both with precise identifiers.
+
+I propose a distinction between the following objects, not necessarily
+separate files or tables:
+
+  Evidence: what was committed by the source system.
+  Episode: a grouping of evidence with a time and context.
+  Appraisal: an interpretation made at a particular time.
+  Recollection: an assembled view of selected episode evidence for a task.
+  Belief: a proposition supported or challenged by available evidence.
+  Skill: a repeatable capability learned or improved through practice.
+  Narrative: a selective summary of R2's recorded history.
+
+The first letter already separates original events, appraisal revisions
+and consolidation results. I would retain that design and add the concept
+of a transient recollection view. This view is assembled only when needed.
+It need not be permanently saved unless it is itself relevant to a diary,
+conversation, decision or later correction. It carries source references,
+a coverage statement and the uncertainty associated with the assembly.
+A retrieved passage from an old diary is a past interpretation, not
+necessarily a present conclusion.
+
+Suppose R2 hears the same music while reading a book on two different
+occasions. The soundtrack, book and room are shared associations. One
+occasion may have included a conversation; the other may not. A recall
+query about the conversation should not fuse both occasions because their
+music is similar. Retrieve the candidate episodes, then resolve their
+differences using event IDs, time ranges and source. If the evidence is
+ambiguous, both remain candidates. R2 may remember that the music was
+associated with reading without identifying which day it was.
+
+This is a functional counterpart of pattern separation and completion as
+broad computational ideas: similar experiences must retain discriminating
+features, while partial cues should still support retrieval. We need not
+claim a hippocampal implementation. A query can first identify candidate
+entities and context, then fetch distinct event groups and rank them.
+The key engineering feature is that a partial cue never silently merges
+historical records. Validate with near-identical episode fixtures whose
+only differences are meaningful details, such as date or object position.
+
+I also propose that an episode may remain open while a related episode
+starts. A phone call can interrupt a reading session without making the
+entire afternoon a phone episode. A nested or overlapping structure fits
+real activity better than a universal single activity label. Keep links
+such as part-of, interrupted-by, resumed-as and followed-by. Time ordering
+alone does not prove a causal connection. When reporting an experience,
+prefer the most specific supported interval rather than assume the entire
+span was occupied by one activity.
+
+07. RECONSTRUCTION, RECONSOLIDATION AND CORRECTION
+--------------------------------------------------
+Memory reconsolidation research explores how retrieval can sometimes
+permit an existing memory to be modified and restabilized. The literature
+contains important qualifications: retrieval does not invariably induce
+destabilization, and the conditions and interpretation of effects are
+contested [II7, II8]. It would therefore be scientifically unjustified
+to declare that every recall should rewrite R2's stored record. That
+would also be a poor engineering decision because an erroneous model
+interpretation could erase the evidence needed to correct it.
+
+The useful software analogy is versioned interpretation. Each recall can
+bring a prior belief into contact with new evidence, and a validated change
+can produce a new belief revision. Earlier appraisals retain their original
+meaning and timestamps. The factual event remains unchanged except for
+explicitly authorized correction or ordinary retention management. An
+incorrectly logged source is a separate data-quality matter: represent
+the correction honestly and retain provenance where appropriate, rather
+than insist that a bad record must be preserved as true.
+
+A concrete example: R2 once tried to power on the CRT and the operation
+failed. Its contemporaneous interpretation was that the television did not
+work. A later observation indicates that an input selection or connection
+was not correct. The new observation does not prove exactly what caused
+the first failure, but it weakens the old generalization. The original
+failure is still factual. A revised belief might read: the TV previously
+failed to display the expected content under those conditions; its current
+operation has since been verified. We should not rewrite the earlier event
+as a successful viewing or confidently assign a cause not established.
+
+Potential belief states include proposed, supported, disputed, superseded,
+and withdrawn. These are bookkeeping states, not psychological diagnoses.
+A new revision should identify supporting and conflicting evidence, the
+superseded revision if any, and the scope of the proposition. A claim about
+one device under one condition should not automatically generalize to every
+model of that device. A later assertion from a conversation partner should
+be recorded as reported information, with its origin visible; it can be
+important without being identical to firsthand observation.
+
+A difficult case is repeated retrieval. If a diary reflects on one event
+five times, we have five reflections on one event, not five independent
+observations. Evidence weighting needs an independence key or original
+source set. A conclusion inferred from a conclusion inferred from a prior
+summary cannot gain support just because it has appeared in more tables.
+I would explicitly test this with a single episode mirrored to Life Log,
+Experiences, Diary and Memory. Replaying and rereading it must not increase
+the observed frequency or reward total. It can generate a different
+interpretation only when clearly represented as such.
+
+The goal is flexible belief without historical instability. It would be
+particularly useful to query both 'What did R2 think at the time?' and
+'What is the best-supported understanding now?' Those are genuinely
+different questions. A robust architecture can answer each by selecting
+the appropriate revision and evidence rather than forcing one timeless
+summary to serve both purposes.
+
+08. ASSOCIATIONS AND COGNITIVE MAPS BEYOND GEOMETRY
+-------------------------------------------------
+Cognitive-map research explores how relationships among entities may
+support flexible behavior, including generalization beyond literal spatial
+navigation. Behrens and colleagues emphasize that much neural evidence
+comes from navigation while considering broader relational representations
+[II9]. The implication is attractive but must remain appropriately modest:
+we can test whether a shared relational representation helps R2 retrieve
+relevant knowledge and plan familiar tasks. This is not a reason to give
+R2 direct access to the world's hidden ground-truth state.
+
+The house supplies the simplest example. R2 learns that the stairs connect
+the floors, the bedroom contains its shelf, and the bathroom is accessible
+from the hallway. These relations may be learned from actual movement and
+observation. The physical map remains the authoritative source for
+collision and placement, while R2's learned map expresses what it knows
+about traversable connections. An edge can become stale when a door is
+closed or the layout changes. Physical movement verifies the actual result.
+Navigation should not teleport R2 to the remembered destination merely
+because a graph contains an edge.
+
+An associative representation could connect places, objects, activities,
+concepts, media, people, and episodes, while retaining the exact meaning
+of each relation. A book may be located-on a shelf at a particular time;
+a reading episode may involve that book; a lesson may concern a topic
+found in its pages; a later conversation may refer to the same topic.
+These links are not interchangeable. Some are observed, some are conceptual,
+some are temporal, and some are inferred. A relation should carry a source
+and a validity interval when the fact is time-dependent. A static graph
+edge must not overwrite an actual item movement.
+
+Start with typed links and bounded retrieval in the existing stores. A
+specialized graph database or embedding engine is not necessary for the
+first demonstration. An indexed table of entity relations and source IDs
+can support many useful queries. Expand a small set of neighbors of a
+relevant entity; filter by relationship type; rank candidate episodes by
+context and evidence quality; then fetch the primary records. Avoid giving
+the text model thousands of neighbors simply because a graph is connected.
+The system needs a mechanism to stop an irrelevant associative trail.
+
+An interesting test: a book mentions a river, R2 later sees a river in an
+illustration, and eventually a conversation asks about rivers. A retrieval
+system that connects the concept across modalities could recall useful
+related material while labeling the illustration and the textual account
+correctly. Seeing a river depicted in a book is not firsthand travel to
+one. A spatial relationship to a virtual river is not a real-world visit.
+Preserving these boundaries makes cross-modal association meaningful.
+
+09. CURIOSITY AS AN INFORMATION-SEEKING PROCESS
+----------------------------------------------
+The literature distinguishes several possible drivers of information
+seeking, including novelty, uncertainty, information gain and learning
+progress [II10, II11, II12]. None alone accounts for all human curiosity.
+Computational developmental studies have also explored how selecting
+activities by learning progress can produce increasingly complex learning
+curricula [II13]. That result motivates an experiment, not a guarantee
+that curiosity in R2 will spontaneously generate useful development.
+
+I propose that curiosity begin as a modest, inspectable candidate source
+for Choice Lab. It may suggest activities within already available and
+authorized capabilities: revisit an unfamiliar page, inspect a visible
+object, compare two known recipes, explore an accessible room, or attempt
+a new puzzle. It does not acquire permission to install programs, contact
+people, access networks, operate physical devices or alter its own code.
+The closed compound metaphor permits internal exchange and additive
+modules; it does not imply removing operator control or boundary checks.
+
+A candidate question needs a scope, evidence of the knowledge gap, a
+possible action to resolve it, expected information value, estimated cost,
+and a condition for stopping. Consider novelty alone: an agent can obtain
+endless novelty by consuming arbitrary unfamiliar input, with little
+understanding. Consider uncertainty alone: a fundamentally random process
+may remain unpredictable forever, causing unproductive attempts. Consider
+reward alone: a system could keep returning to an easy game even when
+nothing new is learned. A modest learning-progress estimate can complement
+these factors by looking for improvements in prediction or task success.
+
+A proposed test score is a contextual combination of estimated learning
+progress, current knowledge gap, task relevance and cost. It is not a
+universal utility and should not determine every choice. Compare a small
+set of strategies against an ordinary baseline, including random eligible
+selection, novelty ranking and progress ranking. Evaluate how much of the
+new knowledge transfers to another task, whether unresolved questions are
+revisited when appropriate, and whether the system can stop when the
+information is not worth pursuing. Do not reward the number of generated
+questions: that would reward the production of question-shaped text rather
+than acquisition of evidence.
+
+Curiosity can be latent. A gap noticed today may be useful next week, but
+it need not interrupt dinner or a conversation. A small pending-question
+record may link to the evidence that created it. It can be marked resolved,
+invalidated, postponed, no longer relevant, or still open. A question
+should not become a permanent obligation. If the user is unavailable,
+there is no reason to repeatedly ask the same question or seek attention.
+The system can pursue another permitted activity, defer, or simply idle.
+
+10. REWARD, HABITS AND CONTEXTUAL PREFERENCES
+-------------------------------------------
+The first letter's treatment of Reward and Addiction remains essential.
+Do not use Addiction as an all-purpose engine for repeated behavior. A
+routine, a preference, a goal-directed choice and a pattern that conflicts
+with other goals are distinguishable. Frequency alone does not determine
+which category is appropriate. A reading habit that follows a useful
+routine can be desirable and should not be represented as pathology.
+The system is a simulation; clinical interpretations are not warranted.
+
+A useful preference record includes a target, context, supporting episodes,
+contrary episodes, strength of evidence and last evaluation time. It may
+include estimated enjoyment, but the origin must be visible: explicit
+appraisal, measured task outcome or an inference. Reward should remain
+responsible for its existing ledger and rules. Experience IDs can connect
+these records without making the Experiences service an additional reward
+issuer. One completed action may legitimately have several domain effects,
+but the same reward operation must not be applied twice.
+
+Imagine two afternoons outside: one warm with a pleasant modeled breeze,
+one equally warm but interrupted by rain. The first is a positive appraisal;
+the second is a different context, not proof of a permanent reversal. A
+third session may occur when R2 has a more important activity indoors.
+Choosing indoors under those conditions does not imply it now dislikes
+warm weather. Preferences are evidence-conditioned tendencies, not commands.
+A choice records the alternatives available and relevant context so that
+later learning can distinguish a rejected action from an unavailable one.
+
+Avoid optimizing engagement with the user as a reward target. An autonomous
+system should not learn that demanding attention, inventing distress or
+repeatedly initiating contact is a successful strategy. Communication with
+the user should be governed by the approved interface, current requests,
+and normal control settings, not a drive to maximize response frequency.
+A satisfactory outcome can be completing an independent activity or
+remaining inactive. If a reward rule creates repetitive or manipulative
+behavior, fix the objective or its source accounting rather than attach
+a fabricated emotion to the outcome.
+
+As an experimental check, change the availability of a formerly preferred
+activity in a controlled world fixture. The system should consider new
+alternatives, retain prior experience, and update expectations when the
+old activity becomes feasible again. This checks flexibility rather than
+requiring every choice to be novel. Test the same scenario with curiosity
+disabled: the basic system must remain capable of a valid choice.
+
+11. REST, OFFLINE WORK AND SELECTIVE CONSOLIDATION
+--------------------------------------------------
+Research on sleep and memory supports roles for selective reactivation,
+consolidation and transformation of memories, while sleep has multiple
+biological functions and the mechanisms vary [II14, II15]. Hippocampal
+replay research has also considered planning and reinforcement; a recent
+review of awake replay argues that evidence for direct online planning
+in rodents is weaker than evidence for some offline learning roles [II16,
+II17]. This disagreement matters for our architecture: do not claim that
+replaying a trajectory automatically produces a better decision.
+
+For R2, an offline consolidation job can be defined without any biological
+claim. Its inputs are a bounded set of committed experiences, its outputs
+are candidate links or lessons, and its effects are validated and logged.
+It may execute while R2 is virtually asleep, resting, or otherwise idle,
+but its actual completion is independent of the simulated sleep state.
+A sleeping animation cannot assert that consolidation occurred; an
+interrupted job cannot silently declare its planned outputs committed.
+
+A proposed job sequence:
+  1. Select a small batch of new or relevant evidence sets.
+  2. Read stable snapshots and existing relevant beliefs.
+  3. Detect duplicates, contradictions and potentially useful patterns.
+  4. Propose changes with evidence IDs, method and scope.
+  5. Validate in the destination owner and record the result.
+  6. Checkpoint actual progress for restart and interruption.
+
+Prioritize based on unresolved uncertainty, task relevance and evidence
+quality, not merely how dramatic an episode sounds. Some ordinary records
+are important precisely because they establish a baseline. A surprising
+result is easier to interpret when compared with typical results. A
+consolidation policy that only retains exceptional events may misrepresent
+what usually happens. Selectivity should mean allocating computation and
+retrieval prominence, not arbitrarily deleting factual records.
+
+Counterfactual simulations can help propose future actions but must be
+isolated from historical replay. Reconstructing a possible route through
+the house is not walking that route. A hypothetical alternative in
+AlternateSelf remains marked as hypothetical. It cannot update actual
+location, charge money, issue reward or count as practice completed.
+A later real attempt may confirm a prediction, and only that attempt
+contributes actual behavioral evidence. Store the hypothesis-to-outcome
+relationship if useful; it can improve calibration without confusing the
+prediction with the observed result.
+
+Consolidation must be interruptible or appropriately deferred, especially
+on the limited local host. Do not monopolize the text model while a user
+message waits. Measure queue latency and memory pressure in mixed workloads.
+If a lengthy job is cancelled, durable source events remain available and
+committed outputs remain identifiable. A scheduling failure does not mean
+R2 experienced a fictional night of dreams. It means a job did not finish.
+
+12. PROSPECTIVE MEMORY AND UNFINISHED INTENTIONS
+------------------------------------------------
+An agent that can recall the past but cannot remember its own unfinished
+intentions has a substantial continuity gap. Inspired by the general cognitive distinction between remembering the
+past and remembering intentions, prospective memory here is a functional
+design term: retain a future-oriented intention and activate
+it when an appropriate context occurs. It is not the same as a past event,
+a standing authorization, or an imperative that must be obeyed forever.
+
+Suppose R2 puts a book down to have dinner and plans to resume afterwards.
+The intention links to the active reading task, its actual page position,
+and a condition such as dinner completion and available time. It should
+not need to re-read its entire diary to discover the pending task. A
+contextual trigger can surface the intention in Choice Lab. The choice
+system then checks whether the goal remains valid, whether the book is
+available, and whether another activity takes priority. The trigger is
+a suggestion to reconsider, not proof of an action or an instruction
+to repeat it after each event.
+
+A small intention record could include an ID, creation event, source,
+objective, conditions, status, expiration where appropriate, checkpoint,
+and related action IDs. The existing task or intention representation in
+Reality should be inspected before adding another store. If it already
+expresses this contract, extend it rather than duplicate it. Store modeled
+calendar time separately from host monotonic time and explicitly specify
+how offline intervals affect the modeled clock. A task due in virtual time
+is not necessarily due in real time; avoid silently conflating the two.
+
+Test pause, cancel, restart, missing objects and changed goals. In each
+case the historical intention persists as an intention and its outcome
+is recorded accurately. A completed objective should not reactivate after
+replayed events. A canceled plan remains canceled unless a new decision
+creates a new intention. The user should retain ordinary control over
+reminders and any real-world interactions. Nothing in prospective memory
+creates a new permission for external communication.
+
+13. PROCEDURAL MEMORY AND THE ACQUISITION OF SKILLS
+--------------------------------------------------
+The distinction between knowing how to describe a task and being able to
+perform it is fundamental to this project. A language model can explain
+how to navigate a staircase without knowing the actual geometry of this
+staircase. It can describe how to operate a fictional device without
+having executed the relevant commands. The proof of a practical skill
+must lie in observed actions and outcomes, not the quality of its prose.
+
+A procedural representation can begin as a versioned, parameterized
+sequence of already supported operations. It should contain preconditions,
+intermediate state checks, known failure cases, a completion criterion,
+and evidence of practice. It must not be an unrestricted executable
+script generated from a diary. Reusable action sequences operate through
+the same authorized Hands and world interfaces as ordinary actions.
+A changed precondition causes the sequence to return an honest result
+or request replanning; it does not invent the missing world state.
+
+A staircase example illustrates the distinction. The developer supplies
+movement, collision and head orientation primitives. R2 learns a route
+by valid movement and observed landmarks. A skill can express a sequence
+of turning, approaching, ascending, and checking a landing, with stopping
+conditions based on legitimate observations and physical feedback. The
+route remains specific to the layout and relevant conditions. If a new
+house geometry invalidates the skill, the record may remain available as
+historical knowledge while being marked stale for execution. The update
+should not erase previous successful experiences or claim that the new
+route has been practiced before it actually has.
+
+There are at least three kinds of procedural improvement to distinguish.
+Efficiency: fewer unnecessary operations to attain the same valid result.
+Reliability: more consistent success across permitted variations. Transfer:
+success with a different object or starting condition that shares relevant
+structure. An evaluation must not award efficiency merely for omitting
+checks that would reveal a wrong result. Compare successful executions
+with the same completion criterion, including any failed actions and
+interventions. A faster invalid attempt is not an improved skill.
+
+The same structure might later support reading routines, kitchen tasks,
+media selection and appropriate device interactions. A recipe and a skill
+are distinct: a recipe may specify desired ingredients and a process,
+whereas the skill demonstrates the ability to perform the available actions.
+Both must consult the actual object and food state, preserve ownership,
+respect the available capabilities and not assume success because a plan
+was produced. A changed ingredient should cause a valid adaptation or
+an explicit inability, rather than generate a fictional meal.
+
+Begin with a few recorded primitives in the house. Implement an explicit
+learned strategy only after repeated experience provides a reason to reuse
+it. Avoid an interpreter capable of accepting arbitrary executable code
+from generated text. A declarative task plan using a fixed action registry
+is easier to validate, migrate and test. This is also more compatible
+with the user's desire for a coherent world rather than a collection of
+unrelated mini-programs.
+
+14. A CONTINUOUS SELF WITHOUT AN INVENTED AUTOBIOGRAPHY
+-----------------------------------------------------
+Autobiographical memory research examines how personal experiences and
+knowledge are organized around a continuing self, with developmental and
+social influences on the construction of a life narrative [II6, II18].
+This suggests a useful functional goal for R2: retain a coherent account
+of its history while distinguishing installed identity information,
+observed events, current preferences and interpretations of the past.
+It does not establish that software has a subjective self.
+
+R2 already has an identity configuration and historical memory. Preserve
+these rather than asking a model to invent an origin story on startup.
+The current system's identity, a relationship label supplied by its
+operator, the date of a build, a documented capability and a personal
+memory are not the same sort of datum. Each can have a legitimate place
+in context, but the model must not derive fictional biography from an
+identity prompt or treat a role as evidence of an unrecorded event.
+
+A compact continuity view might contain the configured identity, current
+capabilities and state, a selection of established preferences, recent
+activities, open intentions, and relevant autobiographical references.
+It should be a bounded retrieval product assembled for a purpose, not a
+second master identity database. Different queries need different views.
+A question about a book does not require the entire history of the system.
+A question about an earlier conversation does require the exact relevant
+record rather than a generic personality summary.
+
+An important distinction is version continuity. If the text model changes,
+the memory records and their provenance should remain. If a diary entry
+was generated using an earlier model, retain that generation information
+when available. If an update changes the interpretation algorithm, old
+appraisals remain understandable in their original context. The new model
+should not need to pretend that it personally generated every prior
+entry to make use of the historical record. Software identity continuity
+can be a property of the persistent system rather than of one inference
+process or model weight file.
+
+A related danger is narrative pressure. A generated narrative tends to
+make disconnected events sound coherent and may accidentally omit
+contradictions. Do not treat coherence as the primary measure of memory
+quality. A useful autobiography can include gaps, misunderstandings,
+changed plans and unresolved issues. The system should not invent an
+experience to fill an empty afternoon. A short factual statement that the
+record does not establish what happened is more valuable than a compelling
+account with no evidence.
+
+Test continuity through an ordinary restart, optional subsystem absence,
+model change in an isolated fixture, and a schema migration. The expected
+results include unchanged evidence IDs, preserved object and task state,
+continued access to old memories, and correct distinction between old and
+new capabilities. A convincing introduction on first launch is not enough.
+We must be able to recover and use real history on the next interaction.
+
+15. THE ARCHITECTURE OF BOUNDED EMERGENCE
+----------------------------------------
+I am interested in behavior that was not specifically written in advance,
+but that follows from the interaction of deliberately designed mechanisms.
+For example, if R2 can observe a book, remember a previous reading session,
+learn a preference for quiet surroundings, choose a place, and resume an
+unfinished task, the resulting choice of where and when to read might
+be a combination we never scripted. The component capabilities were
+implemented by us. The particular behavior was selected using its history.
+That is an appropriate, testable use of the term emergence in this project.
+
+We should not make unpredictability itself the goal. A random number
+source can produce unexpected behavior without any learning. A defect
+can also produce an unexpected result. Useful emergent behavior must
+remain consistent with actual capabilities, observations, authorized goals
+and correct world state. It should be possible to compare the behavior
+with a baseline and trace the inputs that influenced it, even if the
+precise phrasing or timing is nondeterministic.
+
+The user's compound metaphor can be formalized as a collection of state
+owners and typed messages crossing well-defined interfaces. Information
+can circulate repeatedly through the system, but every new traversal needs
+an identifiable purpose and new evidence or a distinct derived operation.
+A diary reflection can refer to an experience and inform a future choice.
+That choice can cause a new action and therefore a new experience. The
+mere act of mirroring the reflection should not recursively generate an
+unbounded sequence of new reflections. The recurrence is a cycle across
+meaningful events, not a circular function call or unrestricted bus echo.
+
+A simple dependency diagram is insufficient to describe runtime behavior.
+Use three complementary views when reviewing an integration: ownership
+(which component controls each durable fact), execution (which components
+call or schedule others), and evidence (which results support later
+claims). A dependency cycle can be avoided even when information flows
+in both directions over time. For example, Experiences reads a committed
+Life Log event and produces an episode link. Memory receives a validated
+lesson referencing that episode. A future action consults Memory, and its
+result returns to Life Log. Neither the original logger nor the memory
+writer has to wait synchronously for the entire circle to complete.
+
+The architecture must remain controllable and inspectable. Adding a new
+subsystem does not give it a right to modify unrelated databases, consume
+all resources, initiate unauthorized communications or bypass the user's
+ability to stop the software. The ability to add functionality is not an
+instruction to make the system resistant to removal, inspection or ordinary
+configuration changes. Closed internal coherence and operational control
+are compatible, and both are needed for a durable system.
+
+16. ORIGINAL PROPOSALS: FOUR EXPERIMENTS WITH LONG-TERM VALUE
+-----------------------------------------------------------
+The following are hypotheses generated while writing this letter. They
+are not claims that neuroscience has validated these exact designs. I
+would prefer to test them in small, reversible prototypes rather than
+create four mandatory new daemons or databases.
+
+EXPERIMENT A: THE EVIDENCE-TO-LESSON BRIDGE
+
+Question: Can a new experience produce a usable, context-specific lesson
+without doubling the original event or reward?
+
+Fixture: one room, a book, a correctly represented reading task, and a
+set of controlled reading attempts under varied conditions. Use synthetic
+fixtures with labeled test origin; do not mix them into the production
+personal history. Commit each attempt through the existing authoritative
+interfaces. Give the baseline agent access to the same original events
+but no new lesson bridge. Give the experimental agent the additional
+ability to generate and validate a contextual lesson.
+
+Observe: whether the selected environment or strategy changes on a later
+related task, whether the lesson cites the right attempts, whether a
+counterexample can revise it, and whether replaying the source causes
+any duplicate reward or practice count. Measure performance on a new
+passage rather than a memorized answer. A useful result would be an
+improvement in a predefined metric such as task completion or accuracy,
+with no loss of provenance. If performance is unchanged, retain the
+negative finding. The architecture might still benefit from better recall,
+but the hypothesized learning improvement has not been shown.
+
+EXPERIMENT B: THE ASSOCIATIVE CUE TEST
+
+Question: Can R2 remember the right episode from an incomplete cue while
+keeping superficially similar episodes separate?
+
+Fixture: create several distinct reading and media episodes with recurring
+objects, similar locations and partially overlapping topics. Include two
+near-identical cases with different dates and outcomes. A query mentions
+only one relevant cue, then adds another cue that discriminates between
+candidates. Compare a simple text search, a typed-link search, and a
+combined approach. Keep the original source evidence equally available.
+
+Measure correct candidate recall, wrong-episode attribution, unsupported
+specificity, retrieval latency and context size. The combined method
+should only be adopted if it offers a measurable benefit under the host
+budget. A system that answers more questions by inventing details has not
+improved. Ambiguity should be reported rather than concealed. Include an
+unanswerable query to measure calibration, not just successful retrieval.
+
+EXPERIMENT C: THE UNFINISHED BOOK
+
+Question: Can intention, bodily location, object state and conversational
+attention remain coherent across an interruption and restart?
+
+Fixture: R2 begins reading a known book at the school desk. At a verified
+page checkpoint a typed message arrives. The current action is paused or
+completed according to its real transaction state; the book remains at
+its actual location. Process two consecutive messages. Restart the test
+instance at a deliberately selected stage. Later make the reading task
+eligible again. Repeat with the book moved, with the intention canceled,
+and with the optional Experiences component unavailable.
+
+Observe: exact message delivery, context integrity, page consistency,
+object identity, preserved task status, no duplicate reading event and
+no unsolicited action caused solely by restart. The goal is not that R2
+always resumes reading. It is that the system can select resumption when
+appropriate and knows accurately what it is resuming. This experiment
+combines the user's existing follow-up problem with the Living Colors
+world contract, without trying to solve a core messaging defect by adding
+a cognitive module.
+
+EXPERIMENT D: THE FAMILIAR HOUSE
+
+Question: Can repeated navigation produce an acquired, reusable capability
+that survives moderate changes in starting position or world state?
+
+Fixture: after the house collision and stair behavior is proven, define
+an accessible target and several valid starting states. Test an agent
+using only current observations and its initial capabilities. Record
+successful and unsuccessful attempts. Allow the experimental condition
+to learn a route or relation from the observations, while a baseline
+retains the same installed primitives. Introduce a movable obstruction
+and a new starting point within the known house.
+
+Measure completion, valid movements, time, wrong turns, recovery from
+obstructions, and use of hidden engine information. A successful agent
+must not be given unknown object positions as cognitive knowledge in the
+evaluation. The physics engine may still use its authoritative geometry. Use a separate engineering observer to verify the ground
+truth and check collision constraints. A reduction in turns on a single
+memorized route establishes familiarity, not necessarily generalized
+navigation. A transfer test is needed before claiming the latter.
+
+These four experiments are deliberately connected. They test the movement
+from perception to retained experience, from experience to recall and
+learning, from learned knowledge to a future action, and from an action
+back to evidence. They therefore test the interaction between subsystems
+rather than the quality of one module in isolation. If one fails, trace
+the first incorrect ownership transition, inference, allocation or delivery
+rather than hiding it with a generic fallback.
+
+17. INTEGRATION AND RESOURCE MANAGEMENT
+--------------------------------------
+The architecture must fit R2's actual computer, not an imagined cluster.
+Volume I identifies the proposed host and rendering budget; none of
+those estimates is a measured benchmark for these new learning services.
+The important principle is that existing model inference, world rendering,
+sensory input, database activity and reflection share finite resources.
+Small deterministic computations are cheap relative to a long inference
+request, but poorly bounded indexes and repeated database scans can still
+make the system unresponsive. Measure before adding infrastructure.
+
+A possible initial implementation requires only a small number of new
+representations: an episode with typed evidence links, an appraisal or
+lesson revision, and a delivery receipt. Existing subsystems can own the
+actual memory, reward, diary and task records. Learned skills and pending
+questions can wait until a minimal integration works. Do not create an
+individual database for every idea in this letter. Evaluate whether an
+existing schema can support the semantics without compromising ownership
+or compatibility. A separate r2_experiences.db remains a reasonable
+proposal because episode assembly is a distinct responsibility, not
+because a separate file is itself a cognitive mechanism.
+
+All cross-database delivery must respect original event identity and
+operation idempotency. Since independent SQLite files do not automatically
+share referential constraints, use explicit validation and the existing
+project's durable delivery conventions where appropriate. A source commit
+and its associated notification may need one local transaction with a
+pending record; a destination applies the operation under a stable key
+and returns a receipt. A crash after the destination applies the update
+but before receipt acknowledgement must not cause another application.
+Validate the actual repository implementation before selecting a protocol.
+This is a conceptual extension of Volume I, not a new universal event bus.
+
+An illustrative interface between an experience owner and a consumer:
+
+  source identity + event identity + operation identity
+  committed source revision + observed time + provenance
+  evidence link type + schema version + optional context reference
+  destination result: applied / already applied / pending / rejected
+
+Do not confuse a rejected validation with successful application. A
+pending item can be inspected and resolved according to its true cause.
+A duplicate operation receipt confirms the same operation, not a new
+experience. A changed interpretation has a new revision but still refers
+to the same underlying evidence. Check original event identities rather
+than counting copies of text.
+
+Resource tests should cover an idle house with no model calls, a moving
+camera, device interactions, reading, a live typed conversation, and a
+consolidation job. Run combinations, not only isolated component tests.
+Capture actual CPU, RAM, VRAM if available, database size and model queue
+latency. Establish a baseline for each environment and document variance.
+Do not present a proposed numerical target as a verified performance
+result. No new service should be enabled solely because its unit tests
+pass if the integrated workload drops messages or fails to preserve state.
+
+Backward compatibility means existing data and optional functionality
+remain understandable. A user with no Living Colors installation should
+still be able to use the existing text and physical-sensor paths. A world
+instance without an LLM should remain manually testable. A record created
+before Experiences existed should be linkable where the evidence is valid,
+without inventing missing appraisal or sensory data. A migration should
+be reproducible on a copy, preserve backups under normal operator control,
+and never silently reinterpret an old domain ID as a global episode ID.
+
+18. THE EXPERIMENTAL PROGRAM AND ACCEPTANCE CRITERIA
+--------------------------------------------------
+I propose the following sequence of research gates. They are conditions
+for evaluating prototypes, not promises about the current code's state.
+
+Gate 0: The existing R2 core passes its relevant tests; consecutive typed
+messages arrive intact; correct context and identity survive ordinary
+operation. The test environment records its branch and model versions.
+
+Gate 1: The standalone Living Colors house is geometrically consistent.
+Movement, stairs, doors, occlusion, object placement and persistence work
+through the same core interface used by manual testing. Geometry changes
+are documented rather than silently treated as the approved final layout.
+
+Gate 2: A real action in the house is represented as a committed domain
+operation and an identifiable factual event. The virtual observation is
+not mislabeled as physical input. Disconnect and restart preserve the
+correct underlying state.
+
+Gate 3: Experiences can assemble one meaningful episode from original
+events without duplicating them. A subsequent appraisal references the
+original evidence and can be retrieved through the existing memory and
+reflection pathways. A neutral episode does not require a reward.
+
+Gate 4: One validated lesson improves or changes a later choice in a
+controlled comparison. A counterexample can revise it without erasing
+history. The existing Reward and Addiction behaviors remain compatible,
+including duplicate-delivery tests and distinction between enjoyment and
+mere repetition.
+
+Gate 5: Attention and interruption tests pass while a learning worker is
+active. A conversation is not forced to wait behind avoidable background
+work; a suspended task retains its real state. Errors are reported and
+repaired at the responsible component, not concealed by fabricated outputs.
+
+Gate 6: Typed associative retrieval and one procedural skill demonstrate
+measurable benefit on held-out cases. If the new method does not beat
+its simpler baseline in the intended dimension, document why and either
+revise it or defer the feature. Keep the simpler working implementation.
+
+Gate 7: Only after the earlier gates are credible, consider broader
+curiosity, longer-term consolidation and developmental curriculum
+experiments. They must remain inside the already authorized world and
+ordinary application interfaces. Do not expand to external actions or
+new privileges as a side effect of experimental cognition.
+
+For every gate, retain the setup, executable version, seed where relevant,
+input data, expected result, observed result, and unresolved failures.
+A test using a mocked vision model demonstrates an interface, not actual
+visual comprehension. A test using a scripted response demonstrates
+routing, not independent learning. A model-based evaluation can be useful
+but should be supplemented by objective checks where possible: exact
+record IDs, verified positions, page state, operation counts, elapsed
+time, independent task outcomes. Report the scope of each claim honestly.
+
+A particularly valuable negative-control test is to remove the relevant
+experience from an isolated evaluation copy, leaving the executable and
+other evidence unchanged. If the expected behavior remains identical,
+the result may arise from pretrained model knowledge, a fixed rule or
+another cue rather than the new experience. This does not prove the
+architecture is useless, but it prevents claiming a learning effect that
+has not been isolated. Conversely, if the system fails every task without
+a particular summary, it may have become overdependent on one fragile
+representation. Test graceful degradation as well as successful recall.
+
+19. EDITORIAL RECONSIDERATION: WHAT TO DISCARD OR DEFER
+------------------------------------------------------
+Writing the second letter changed my view in several important respects.
+I began with the idea of a second collection of subsystems. On reconsidering
+Volume I, I believe that would be too literal a reading of neuroscience.
+The more interesting question is what new behavior an additional link or
+representation makes possible. The following revisions should take
+precedence over the more expansive sketches above.
+
+First, defer a global development score. It would conflate unrelated
+abilities, depend strongly on the selected tasks, and create pressure to
+optimize the metric instead of the capability. Maintain a few local
+competence assessments with clear evidence and scope. If a later user
+interface needs a summary, make the underlying distinctions available.
+
+Second, defer an explicit 'subconscious' personality process. The word
+suggests more than the proposed computation supports. Nonlinguistic
+statistics, indexing and scheduling are useful; a hidden stream of
+invented thoughts is not required for them. Let those results influence
+appropriate decisions and let Diary interpret selected evidence. Do not
+make the model narrate its background calculations as actual inner life.
+
+Third, do not make reconstruction a write-on-read behavior. Retrieval
+can expose evidence for a useful revision, but a query alone does not
+justify changing durable beliefs. Keep recollections transient unless
+there is a reason to retain them, and validate changes through a clear
+owner. This is simpler, more robust and closer to the real purpose of
+our analogy than unconditional rewriting.
+
+Fourth, do not equate curiosity with novelty maximization. Novelty is
+one useful cue among several. Start with relevant unresolved questions and
+measurable progress on local tasks, with a real option to stop or defer.
+Avoid introducing a universal reward formula, and retain ordinary task
+selection when the curiosity experiment is disabled.
+
+Fifth, do not add a dedicated sleep daemon just to make the concept sound
+biological. Begin with bounded, resumable offline consolidation work using
+the existing scheduling mechanisms where possible. The simulated sleep
+state may supply an appropriate time to perform work, but success must
+be measured from actual committed results. If the host cannot sustain it
+alongside conversation, schedule less work rather than removing essential
+context or changing the user's chosen model without approval.
+
+Sixth, keep autobiographical summaries subordinate to the evidence. Their
+value lies in finding and connecting relevant material, not in giving the
+system a polished narrative at all times. Contradictions, changed opinions,
+missing observations and version changes are part of a valid history.
+
+Seventh, there is a possible conflict between learning from repeated
+practice and preserving privacy or limiting storage. We should not solve
+this by keeping every frame and every redundant transcript indefinitely.
+Store the necessary evidence and stable references according to ordinary
+retention choices. If evidence is removed by an authorized operation,
+record the resulting limitations on derived claims as appropriate. The
+user's additive architectural principle should never be interpreted as a
+prohibition on maintaining or controlling their own data.
+
+Finally, these letters must not displace the immediate engineering work.
+R2 needs a functioning house and reliable conversation more urgently than
+a sophisticated theory of emergent cognition. The greatest near-term
+return may come from a single well-connected experience and a small,
+repeatable experiment. The grand architecture is only meaningful if that
+small loop works in the real system. Future developers should reread this
+section whenever they feel tempted to create another service merely
+because a term from neuroscience sounds promising.
+
+20. REFERENCES AND CLOSING LETTER
+---------------------------------
+The following sources supplement Volume I. Titles and identifiers point
+back to the literature consulted. Claims above are paraphrased, and the
+engineering proposals are ours, not conclusions directly asserted by
+these authors. Review abstracts and accessible text were the main basis;
+consult complete papers and primary research before relying on a detailed
+mechanistic interpretation. In particular, animal replay findings and
+human imaging models should not be treated as equivalent evidence.
+
+[II1] Johnson MH. Interactive Specialization: A domain-general framework
+for human functional brain development? Developmental Cognitive
+Neuroscience (2011). https://pubmed.ncbi.nlm.nih.gov/22436416/
+
+[II2] Perruchet P, Pacton S. Implicit learning and statistical learning:
+one phenomenon, two approaches. Trends in Cognitive Sciences (2006).
+https://pubmed.ncbi.nlm.nih.gov/16616590/
+
+[II3] How does the brain learn environmental structure? Ten core
+principles for understanding the neurocognitive mechanisms of statistical
+learning. https://pmc.ncbi.nlm.nih.gov/articles/PMC7211144/
+
+[II4] Cognitive Control. Annual Review of Psychology, recent review.
+https://doi.org/10.1146/annurev-psych-022024-103901
+
+[II5] Shenhav A, Botvinick MM, Cohen JD. The expected value of control:
+an integrative theory of anterior cingulate cortex function. Neuron (2013).
+https://pubmed.ncbi.nlm.nih.gov/23889930/
+
+[II6] Conway MA, Pleydell-Pearce CW. The construction of autobiographical
+memories in the self-memory system. Psychological Review (2000).
+https://pubmed.ncbi.nlm.nih.gov/10789197/
+
+[II7] Lee JLC, Nader K, Schiller D. An update on memory reconsolidation
+updating. Trends in Cognitive Sciences (2017).
+https://pmc.ncbi.nlm.nih.gov/articles/PMC5605913/
+
+[II8] Appraising reconsolidation theory and its empirical validation.
+https://pmc.ncbi.nlm.nih.gov/articles/PMC7614440/
+
+[II9] Behrens TEJ et al. What Is a Cognitive Map? Organizing Knowledge for
+Flexible Behavior. Neuron (2018). https://pubmed.ncbi.nlm.nih.gov/30359611/
+
+[II10] Kidd C, Hayden BY. The psychology and neuroscience of curiosity.
+Neuron (2015). https://pmc.ncbi.nlm.nih.gov/articles/PMC4635443/
+
+[II11] Gottlieb J, Oudeyer PY, Lopes M, Baranes A. Information-seeking,
+curiosity, and attention: computational and neural mechanisms. Trends in
+Cognitive Sciences (2013).
+https://www.sciencedirect.com/science/article/pii/S1364661313002052
+
+[II12] The Curious U: Integrating Theories Linking Knowledge and
+Information-Seeking Behavior. https://doi.org/10.1162/OPMI.a.41
+
+[II13] How Evolution May Work Through Curiosity-Driven Developmental
+Process. https://doi.org/10.1111/tops.12196
+
+[II14] Rasch B, Born J. About sleep's role in memory. Physiological Reviews
+(2013). https://pubmed.ncbi.nlm.nih.gov/23589831/
+
+[II15] Sleep's contribution to memory formation. Physiological Reviews.
+https://doi.org/10.1152/physrev.00054.2024
+
+[II16] The Role of Hippocampal Replay in Memory and Planning. Current
+Biology (2018). https://pmc.ncbi.nlm.nih.gov/articles/PMC5847173/
+
+[II17] Awake replay: off the clock but on the job. Review (2025).
+https://pubmed.ncbi.nlm.nih.gov/40121166/
+
+[II18] Fivush R. The Development of Autobiographical Memory. Annual Review
+of Psychology (2011). https://doi.org/10.1146/annurev.psych.121208.131702
+
+To my future colleagues: the most important quality of this project is not
+that the architecture sounds like a brain, but that it connects functions
+which ordinarily remain separate in a simple application. If perception
+can change what is learned, if knowledge can change a later action, and
+if that action yields another observation, then we have built a meaningful
+loop. If the loop remains grounded in evidence through interruptions,
+restarts, mistakes and software updates, we have built something durable.
+If that loop can support a wider range of activities without requiring
+us to write each individual outcome beforehand, then the research has
+begun to achieve its purpose.
+
+Do not forget the house. A working doorway, a book on a shelf, an
+accurately remembered page, and the ability to resume an activity after
+an ordinary conversation are not trivial distractions from cognition.
+They are the situations in which the cognitive architecture can prove
+that it works. Build those situations correctly. Let the evidence guide
+which mechanisms deserve the next investment. Preserve the accomplishments
+already present in the original system, and add to them deliberately.
+
+Respectfully submitted,
+The research assistant for R2-3PO development
+25 November 2026

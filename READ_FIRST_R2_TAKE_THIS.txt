@@ -1,0 +1,60 @@
+=======================================================================
+R2 DEVELOPMENT: READ THIS BEFORE TOUCHING THE COGNITIVE ARCHITECTURE
+"Take this. It's dangerous to go alone."
+=======================================================================
+
+ATTENTION, FUTURE R2 DEVELOPER / ASSISTANT:
+The user asked for a detailed neuroscience-informed design letter to serve
+as a durable research reference, not as an immediate feature checklist.
+Read R2_NEUROSCIENCE_LETTER.txt in this same directory before designing or
+changing Living Colors, Experiences, Reality, memory, perception, Reward,
+Addiction, reflection, autonomous decisions, or any new cognitive module.
+Do not rely on this note alone; the letter includes the rationale, source
+URLs, testable proposals, caveats, and implementation sequencing.
+
+The approved direction: R2 and Living Colors are independently developed
+parts of one closed-by-default, internally extensible ecosystem. House
+first, outward expansion later; no generic game controller as the real
+interface. R2's existing subsystems already form recurrent information and
+experience loops. New modules must extend these loops and preserve old
+behavior, source identity, memories, databases, device state and interfaces.
+Reality remains authoritative for existing domain state. Experiences is a
+proposed global subsystem, not a Living Colors-only event log. It can connect
+observations, actions, appraisals, reward, habits, diary and new semantic
+memories through stable evidence IDs. Do not silently fabricate observations,
+learned preferences, subjective experience, or implementation progress.
+
+The central research insight: cognition is distributed, recurrent, embodied
+and multi-timescale. The language model is a participant, not the entirety
+of the architecture. Keep evidence separate from belief; preserve raw events
+while allowing interpretations to change. Learning should be testable,
+reversible where appropriate, and compatible with historical data.
+
+Before acting: verify current repository heads and read actual interfaces.
+Reference inspected during this discussion: Xylin48/R2-3PO commit
+3d1052114e807a965509a22f8467b6b103a0e896 (open PR #194, NOT necessarily
+current or deployed). Living Colors: Xylin48/livingcolors, development
+branch dev/world-foundation. Do not infer later test success from this note.
+
+Research prepared 25 November 2026 (America/New_York). The paper is an
+engineering research memorandum, not a biological brain simulation, a
+claim of consciousness, or authorization to enable networking, external
+control or any particular experimental implementation.
+
+If this file was recovered without its companion letter, retrieve the
+companion from the original conversation or its user-maintained copy. If
+neither is accessible, state that; do not pretend to remember it verbatim.
+
+COMPANION VOLUME II -- ADDITIONAL RESEARCH, 25 NOVEMBER 2026
+Read R2_NEUROSCIENCE_LETTER_VOLUME_II.txt after the first letter, especially
+before introducing learned skills, associative retrieval, curiosity,
+prospective memory, offline consolidation or development metrics.
+The second letter extends rather than replaces Volume I. It distinguishes
+installed capabilities from acquired competence, evidence from recollection,
+and factual replay from hypothetical exploration. Its four proposed
+experiments are Evidence-to-Lesson Bridge, Associative Cue Test, Unfinished
+Book and Familiar House. Sections 18 and 19 contain the research gates and
+critical reconsideration. Do not treat proposals as implemented features.
+No repository code was changed or performance benchmarked by Volume II.
+Keep the house and reliable consecutive messages as immediate priorities.
+Read both full letters for the reasoning; this note is only an index.

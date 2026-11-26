@@ -1,0 +1,1402 @@
+=======================================================================
+A LETTER TO THE FUTURE DEVELOPER OF R2-3PO
+NEUROSCIENCE, EMBODIED COGNITION, AND THE CONTINUITY OF A SOFTWARE MIND
+=======================================================================
+25 November 2026 | Research and architectural memorandum | Revision 1.0
+
+To the future assistant and developers entrusted with the R2-3PO project,
+
+I write this letter at a significant point in the project's development.
+The user has given us an unusually useful guiding metaphor: Living Colors
+and the existing R2 system should join like complementary parts of a
+compound, preserving a coherent internal boundary while remaining capable
+of incorporating new components. More importantly, the user has asked us
+to learn as much as we can from the human brain, not merely to reproduce the
+outward appearance of intelligence. This letter is intended to carry that
+research forward. Please consult it when the next architecture decision
+seems small, because a small decision about the ownership of a memory, the
+identity of a sensory event, or the delivery of a result may affect every
+other part of the system.
+
+I do not intend this letter to be a proposal to reproduce a brain neuron by
+neuron. I do not know how to do that, and neuroscience does not provide a
+complete executable specification of a human mind. The project can pursue
+functional similarities: learning over time, active perception, action and
+feedback, continuity, multiple kinds of memory, self-regulation, planning,
+reflection and coordinated specialist processes. We can measure these
+functions without asserting consciousness or subjective sensation. A verbal
+report of comfort from a program is a modeled appraisal, not proof of an
+experienced feeling. That distinction protects the integrity of the project
+rather than diminishing its ambition.
+
+I have organized this letter as a reference rather than a demand to build
+all of its ideas immediately. The sections distinguish reviewed neuroscience
+findings, engineering inferences and speculative future experiments. The
+literature search consulted academic abstracts, review descriptions and
+available publisher/PubMed text; it was not an exhaustive full-text review,
+meta-analysis or independent replication. Numbered references at the end
+provide a path back to the sources. Reopen them before implementing a
+mechanism whose precise biological details matter. All R2 interfaces and
+file names below must also be checked against the latest source. The code
+inspection grounding this letter was of a particular development snapshot,
+not a guarantee about the deployed robot.
+
+CONTENTS
+  01. Mission, boundaries and interpretation
+  02. Cells, synapses, plasticity and supporting infrastructure
+  03. Distributed networks, recurrent signaling and modularity
+  04. Sensation, active perception and prediction
+  05. Embodied movement, navigation and skilled action
+  06. Internal regulation, time, attention and competing goals
+  07. Memory systems and a global Experiences subsystem
+  08. Encoding, consolidation, replay and the diary
+  09. Appraisal, reward, habits and choice
+  10. Language, imagination, learning and development
+  11. A concrete integration contract with current R2
+  12. Persistence, schemas, transactions and delivery
+  13. A worked sequence in the house and outside it
+  14. Engineering budgets and the experiment program
+  15. Second-pass critique and revised recommendations
+  16. Implementation priorities and acceptance criteria
+  17. Research references and closing letter
+
+01. MISSION, BOUNDARIES AND INTERPRETATION
+------------------------------------------
+The brain is not an isolated text generator. It coordinates an organism's
+interaction with the world, continually using sensory inputs, internal state,
+prior learning and action consequences. Cognition depends on numerous
+processes operating at different scales. Network neuroscience explicitly
+investigates such interactions rather than assigning all explanation to
+isolated anatomical regions [1]. The point for R2 is that a successful
+answer to a question is one observable output among many, not the entirety
+of intelligence. A coherent system also remembers where it left a book,
+notices that something changed, revises a plan when a door is closed, and
+can later distinguish what it observed from what it merely inferred.
+
+The user's compound metaphor has a precise engineering translation. A
+component boundary defines who may read or mutate a state, what the caller
+can expect, how an event crosses that boundary, and what happens during
+shutdown or a failed operation. Modularity makes implementation tractable;
+reciprocal communication makes the system useful. An extensible internal
+architecture is not a license for all modules to write to all tables. It is
+an obligation to provide defined paths through which information can flow.
+An append-only evidence history can coexist with mutable current state and
+explicit user-controlled deletion. Backwards compatibility means preserving
+semantics and data, not keeping every defective implementation forever.
+
+The boundary should be closed to unauthorized external access and output,
+not sealed against the legitimate sensors and communication interfaces
+that are part of the project. An isolated local world can still provide
+explicitly configured communication to the owner's Android application;
+this is a controlled connection, not a reason to give the simulation general
+network access. Local operation must remain possible if the network is
+absent. User control over disabling, uninstalling, inspecting, updating or
+removing data must be preserved. The system must never attempt to prevent
+its operator from shutting it down or changing it. The user's project
+metaphor of continuity concerns capabilities and design integrity, not
+irrevocable autonomy or an inability to delete unwanted information.
+
+Keep three categories distinct in every specification: (a) evidence about
+biology, (b) a useful computational analogy, and (c) an implemented and
+tested capability. The term 'hippocampus-inspired' cannot make a key-value
+store a hippocampus. The term 'experience' cannot verify consciousness.
+
+02. CELLS, SYNAPSES, PLASTICITY AND SUPPORTING INFRASTRUCTURE
+-----------------------------------------------------------
+At the cellular level, neurons integrate signals across their membranes and
+process inputs with electrical and biochemical mechanisms. Action potentials
+allow signals to travel along axons; at many synapses, electrical activity
+leads to release of neurotransmitters that act on receptors. Electrical
+synapses also permit more direct coupling. Synaptic responses differ by
+receptor, timing, recent activity and cellular context [2]. This is much
+richer than a binary switch or a method call. A neuron can participate in
+multiple circuits; its contribution varies with its inputs and history.
+
+Learning is associated with changes in synaptic efficacy and other forms of
+plasticity. Long-term potentiation and depression are families of effects,
+not a single learning algorithm. Experience can alter cellular excitability,
+synaptic connectivity and how circuits respond; local changes must be
+balanced against the stability of the network [3,4]. Homeostatic regulation
+is especially relevant: a system that strengthens every successful response
+without countervailing mechanisms can saturate or become unstable. Neuronal
+activity is supported and shaped by glial cells, including astrocytes,
+oligodendrocytes and microglia; biological learning is therefore inseparable
+from the infrastructure sustaining the tissue [5].
+
+The immediate engineering inference is not to emulate ion channels. R2 can
+implement transparent adaptive relationships over semantic concepts,
+contexts, events and actions. A graph edge could retain the number and
+quality of independent supporting experiences, contradictory evidence,
+recency, and an interpretable confidence measure. A retrieval association
+could become easier to activate through repeated relevant observations,
+then gradually lose priority when it ceases to be useful. Historical facts
+must not be destroyed merely because a retrieval priority decays. In fact,
+keeping storage separate from priority makes it possible to examine why the
+system remembered one thing and missed another.
+
+A possible experiment: after three distinct visits to the bedroom in which
+a reader is observed on the desk, the association reader -> desk becomes
+stronger, but never authoritative. If the fourth observation finds it on the
+shelf, the old desk observation remains valid for its time and the current
+belief updates. Compare a static association table, a recency-weighted table
+and an evidence-counted table on identical event sequences. Measure recall
+precision and correction after an object is moved. Do not use reinforcement
+to increase an association merely because the model repeated its own prose.
+
+The support-system analogy suggests a maintenance service, not a fictional
+neurotransmitter implementation: memory indexes, schema verification,
+resource budgets, stale frame detection, lock-order diagnostics and clean
+shutdown are first-class prerequisites. A damaged index is not a lost
+memory; a stalled worker is not an absence of perception. Report each
+condition accurately. A quiet system doing useful work is more valuable
+than an elaborate simulated organ that cannot persist a single fact.
+
+03. DISTRIBUTED NETWORKS, RECURRENT SIGNALING AND MODULARITY
+-----------------------------------------------------------
+Cortical, thalamic, subcortical and other circuits exchange information in
+both directions. Research on thalamic participation in cognitive control
+and cortico-thalamo-cortical connectivity highlights that coordination can
+change according to the task instead of being a fixed relay from sensor to
+response [6,7]. Network organization also changes over several timescales:
+local specializations coexist with transient integration across areas [1,8].
+There is no requirement to imagine every cognitive function passing through
+one anatomical point in a fixed order.
+
+R2's approved diagram is a graph of causal and informational relationships,
+not a required synchronous call stack. A physical observation might lead to
+attention, retrieval, a choice and an action; a memory might instead begin
+the cycle. Needs can alter a choice without first becoming language. A
+single action can create an observation, an inventory change, a location
+transition and a learning opportunity. A diary reflection can suggest a
+new hypothesis which later guides exploration. Some pathways must run
+concurrently and some must wait for committed outcomes. This is reciprocal
+communication without recursion.
+
+I recommend a typed internal event protocol with an explicit command path.
+Commands ask an owner to perform a change. Events announce what was actually
+observed or committed. Queries return present evidence or explicit unknowns.
+These three categories must not be blurred: a request to turn on a television
+is not a claim that the device is on. An event of completion requires a
+committed change from the authoritative device or Reality service. A
+subscriber may emit a new event with its own identity, but cannot keep
+reissuing the incoming event as if it were new. Preserve causation and
+correlation identities so the path is inspectable.
+
+Some communication will remain direct calls, especially tight movement and
+rendering operations. Do not route every pixel or physics substep through
+SQLite or a universal message broker. Use synchronous calls within a
+cohesive service, typed notifications for boundaries, and durable delivery
+only for information that must survive interruption. A continuous cognitive
+loop is accomplished over time, not by calling every subsystem after every
+line of code. A graph with bounded queues and explicit state owners can be
+highly connected without a single circular initialization dependency.
+
+A future coordination module might maintain current attention, available
+capabilities and subscriptions for active tasks. Initially it can be a small
+struct and scheduling routine within the existing orchestration layer.
+Create a new process or subsystem only when responsibilities and lifecycle
+justify it. A thalamus analogy is not a reason to introduce a central
+single point of failure. Prefer measurable changes to a fictional anatomy.
+
+04. SENSATION, ACTIVE PERCEPTION AND PREDICTION
+---------------------------------------------
+Perception involves more than receiving a perfect copy of the environment.
+Signals are incomplete, noisy, and arrive through multiple modalities. A
+brain must infer which signals belong to the same cause, assign weight to
+uncertainty, attend to useful evidence and update representations [9,10].
+Prediction-based models propose that expectations influence processing and
+that mismatches can drive attention and learning. There is experimental
+support for particular prediction-error circuits, including mouse visual
+cortex research [11], but whether one predictive-processing theory explains
+all perception is disputed [12]. Do not treat a theoretical framework as a
+universally established neural algorithm.
+
+The house provides an excellent controlled environment for implementing
+these distinctions. Living Colors owns the true geometry. The first-person
+camera produces an actual image with perspective and occlusion. Its normal
+view is 640x480, 4:3 with the approved 125% reference magnification; this is
+a project design choice, not a human visual physiology claim. Eyes receives
+raw frames with an explicit virtual-world origin. Visual interprets selected
+frames; it does not magically read the scene graph. Ears receives virtual
+sound with its origin distinguished from microphones and desktop media.
+R2 can know about an object from remembered information but not claim to
+see it through a wall. The engine may use hidden collision geometry to
+validate action without exposing it as personal knowledge.
+
+A sound, visual frame, contact report and proprioceptive state may share a
+world revision and monotonic timestamp. A correlation candidate should
+include temporal interval, modality, source instance, location estimate and
+uncertainty. Two sounds occurring together are not necessarily from the same
+object. For example, a television's soundtrack and a physical microphone
+capturing the room must not be merged merely because they overlap in time.
+A phone notification in Living Colors is distinct from the owner's voice on
+a physical call. It is also possible for one cause to legitimately appear
+in multiple channels; preserve the underlying identity to avoid counting
+several observations as several independent experiences.
+
+Introduce a belief layer that describes what R2 currently thinks is true:
+object identity candidates, approximate location, last seen time, provenance,
+certainty and competing explanations. Store expected state separately from
+observed state. When R2 expects a book on the desk and does not see it, mark
+the expectation as challenged, but do not conclude that the book vanished.
+It might be occluded or outside the frame. An observation of the entire
+empty desk is stronger evidence than a glance at a corner. A hypothesis can
+prompt a new gaze or search; the next observation can refine the belief.
+
+Practical test: render the same room with the door open and closed, and
+place a reader behind the partition. The perception query must not identify
+the hidden reader as visible. Rendered geometry and collision must agree;
+record the observer's pose and world revision. Move the book, and observe
+whether recall influences the search without overriding the actual frame.
+Use different sources at the same time and verify that a physical camera
+continues functioning while virtual Eyes is unavailable. Keep an explicit
+frame-lifetime contract and preserve immutable source metadata when an
+inference is deferred or completed after the source changes.
+
+Touch and environment sensors are legitimate additions. A simulated contact
+can report material, contact position, approximate pressure and temperature.
+Wind can report direction, velocity and local exposure; a shaded patch can
+have a different effective temperature than a sunny one. These quantities
+are world outputs; comfort is a separate modeled interpretation. No event
+should claim R2 has a real biological skin, olfactory receptor or pain system.
+
+05. EMBODIED MOVEMENT, NAVIGATION AND SKILLED ACTION
+---------------------------------------------------
+Research on navigation describes hippocampal and entorhinal spatial codes
+and landmark processing, including place, grid and head-direction related
+activity, with important evidence from both animal studies and humans [13].
+Planning routes involves interactions among regions rather than a single
+perfect spatial map. Sensorimotor learning uses error feedback and may
+rely on predictive internal models that anticipate the effects of commands;
+there are competing accounts of the precise role of cerebellar computation
+[14,15]. A useful principle is that efficient control requires both prediction
+and correction, not that every motor task must recreate a cerebellum.
+
+Keep two maps. The simulation's true spatial map defines collisions and
+allowed locations; R2's learned map is assembled from movement, landmarks,
+observations and experience. Known rooms, routes, doors and associated items
+can be stored as a small graph augmented with coordinates and uncertainty.
+A known path can speed navigation, but an unexpected obstacle or closed door
+must prompt a revision. Avoid presenting the complete map as an observation.
+Pose estimates can be reported by the virtual body as proprioception; this
+is not equivalent to omniscient knowledge of every object position.
+
+Movement must take simulated time and yield actual results. A high-level
+request such as 'go to my desk' is a goal, not a teleport. A local controller
+can plan a path along known routes, issue bounded motion steps, observe
+progress and stop or replan when a route is blocked. Walking, turning the
+body, looking with the head, reaching, grasping, sitting and standing are
+different actions. Seated posture changes eye height and reachable space.
+Objects remain in the place where they were actually left. A grasped book
+must have one stable identity rather than a duplicate copy in the pocket and
+on the desk. A pause or interrupted action must leave a valid physical state.
+
+A skill is not merely a string describing how to do something. A skill
+record can include a task goal, prerequisites, ordered action primitives,
+observed success/failure, known exceptions and confidence. It should be
+possible to use the same primitives in a new situation. If a path to a desk
+is obstructed, an old skill should not replay the exact invalid coordinates.
+Track outcomes rather than awarding skill points for declarations. One
+future experiment compares a fixed route replay with landmark-based planning
+and verifies transfer after the desk chair changes position. Another compares
+actual time and errors on repeated drawer-opening actions without increasing
+speed beyond the simulated body's capabilities.
+
+The proposed Spatial subsystem should provide body pose, action lifecycle,
+contact/locomotion and learned navigation support. The current Living Colors
+engine already has collision and a provisional stair model, so do not
+create an incompatible second coordinate system. In the existing branch the
+staircase and floor geometry are not yet fully verified; address foundational
+physics before interpreting sophisticated movement behavior. Any body state
+beyond the current standing pose requires an explicit migration and tests.
+
+06. INTERNAL REGULATION, TIME, ATTENTION AND COMPETING GOALS
+------------------------------------------------------------
+Interoception concerns information about internal bodily conditions;
+allostatic regulation concerns meeting needs, including anticipating future
+needs. A useful review describes their relationship in control-theoretic
+terms [16]. Biology has many regulatory systems, and not all internal
+variables need to be held to a single fixed target. Circadian rhythms,
+rest, activity and energetic demands constrain other processes. The
+engineering implication is to give R2 a continuously evolving internal
+state that influences decisions, without pretending the software possesses
+a biological body.
+
+Reality already tracks modeled needs and self/world continuity. Extend its
+existing variables rather than introduce a separate, competing hunger
+system. A simulated meal's effect must come from the authoritative food
+model; a new Experience can record the outcome and its evaluation, but
+cannot apply the meal's fullness twice. A long walk might affect modeled
+fatigue; sitting or resting might change it. The particular equations,
+units, rates and bounds are engineering choices. They should be explicit,
+inspectable and tested across real elapsed time, simulation time and
+shutdown intervals. Do not quietly turn a program's CPU temperature into a
+simulated feeling: hardware diagnostics and modeled condition are distinct.
+
+Use three clocks: monotonic elapsed time for live actions and scheduling,
+calendar time for the historical timeline, and a persisted virtual-world
+clock for simulated processes. The latter may advance during inactivity
+according to an explicitly documented policy. Distinguish ordinary elapsed
+time from accelerated test time. A suspension of the host must not create
+thousands of fabricated sensory observations when it resumes. On restart,
+only processes whose state model supports elapsed-time catch-up should
+advance; actual observations must originate from real capture or simulation
+steps. Time-dependent changes should be deterministic in headless tests.
+
+Working memory is not simply a short buffer of words. Neuroscience suggests
+that attention to existing sensory, motor and semantic representations is
+central to working memory; control involves interacting circuits [17]. For
+R2, maintain an active context of goals, recent observations, salient
+retrieved episodes, body state, ongoing actions and the actual current
+conversation. The current user turn must not vanish simply because a virtual
+world event became interesting. Each context entry should carry its origin,
+size, priority, validity interval and reason for inclusion. A large document
+is a reference to be read deliberately, not an excuse to truncate the
+current conversation or overwrite a smaller but crucial item.
+
+Attention can be an explicit selection mechanism. A task can request high
+priority for its relevant sensory channels; an unexpected event can compete
+for selection; low-salience streams can continue their native sampling
+without invoking expensive inference on each sample. A user conversation
+may require an ongoing world action to pause at an interruption point, or a
+book-reading task may continue independently while the robot answers a
+brief question. The architecture should allow simultaneous inexpensive
+processes without allowing incompatible resources to be claimed twice.
+
+Do not force a choice every interval. Inactivity is legitimate. A scheduler
+that always manufactures an urgent goal will appear busy but not coherent.
+A decision can be to continue resting, wait for a current action, observe
+again, defer a task or abandon it. Consider a task representation with
+identity, goal, priority, current phase, prerequisites, reserved resources,
+checkpoint, last observed outcome and cancellation state. Cancellation is
+an actual action outcome, not erasure of the preceding activity. The next
+choice should have access to the reason a previous attempt stopped.
+
+07. MEMORY SYSTEMS AND A GLOBAL EXPERIENCES SUBSYSTEM
+------------------------------------------------------
+Memory is not unitary. Research distinguishes declarative memory about
+facts and events from multiple nondeclarative learning abilities, including
+skills and habits, while emphasizing interactions and subtleties in their
+neural organization [18]. Episodic and semantic representations have
+different functional roles. Working memory temporarily supports current
+processing. Prospective remembering involves retaining intentions for later
+execution. Emotional significance, familiarity, conditioned responses and
+spatial knowledge add further dimensions; these need not all be separate
+database files. The distinction matters more than the number of services.
+
+Complementary learning systems theory proposes different learning regimes
+for rapidly recording individual events and slowly extracting regularities
+from many events [19,20]. It explains an important computational tradeoff:
+learning one episode immediately is valuable, but allowing a single unusual
+case to rewrite everything previously learned is destabilizing. Research
+on allocation and linking of memory traces also motivates preserving
+connections among related events while retaining their individuality [21].
+These are functional inspirations; they do not prove that every human
+memory fits a literal two-database model.
+
+The strongest proposed addition is a global Experiences subsystem. Do not
+make it a diary with a new name or a second Life Log. It should integrate
+firsthand events into meaningful episodes, associate the original evidence
+with contextual facts and modeled appraisals, and make the result available
+to recall, reflection, decision-making and later learning. It should work
+for physical sensors, virtual environments, conversation, games, learning,
+reading, experiments, media, work, social exchanges and internal modeled
+states. Not all episodes need a subjective rating. An event may be unusual,
+uncertain, informative, ordinary, neutral or not worth elaborating.
+
+Recommended division of responsibilities:
+  - Life Log records factual chronology and stable original event identity.
+  - Sensory Journal indexes actual sensory and thinking events and their links.
+  - Experiences groups related evidence and stores versioned interpretations.
+  - Reality owns current world/self state and existing domain transactions.
+  - Memory holds retrievable facts, associations and learned generalizations.
+  - Diary contains private reflection, linked to the evidence it used.
+  - Reward records actual reinforcement using existing rules and identities.
+  - Addiction evaluates patterns of voluntary repetition and learned value.
+  - Choice Lab selects among feasible actions using current evidence and needs.
+  - AlternateSelf and Imagination retain clearly hypothetical representations.
+
+An experience can span minutes, hours or a meaningful portion of a day.
+Research on event perception considers how people segment continuous
+activity into structured events, often around changes in goals, locations
+or predicted activity [22]. For R2, begin with simple rules rather than a
+model call for every second: explicit task start/end, room transition,
+interruption, change of object or media, meaningful shift in internal state,
+and an inactivity timeout. A user conversation and an ongoing virtual task
+may overlap, so use event relationships rather than forcing a single
+partition of the entire timeline. Episodes can be nested: an afternoon of
+studying may contain a reading session, a short break and a conversation.
+
+Illustrative data design (not final SQL or an approved schema):
+
+  experience
+    experience_id, start_event_id, end_event_id, start_time, end_time,
+    source_domain, category, goal_id, situation_id, status, schema_version
+
+  experience_evidence
+    experience_id, original_event_id, relation, source, observed_interval,
+    provenance, unique(experience_id, original_event_id, relation)
+
+  experience_appraisal
+    appraisal_id, experience_id, revision, created_time, interpretation,
+    valence, arousal_or_activation, comfort, interest, confidence,
+    author_or_model, evidence_revision, supersedes_id
+
+  experience_association
+    experience_id, entity_id, relation, confidence, evidence_reference
+
+  consolidation_result
+    result_id, experience_id_or_set, memory_id, relation, model_version,
+    evidence_set_hash, status, revision, supersedes_id
+
+  delivery
+    destination, stable_operation_id, state, attempt_metadata, receipt_id
+
+Some fields may belong in existing stores rather than a new database. For
+example, source names and event payloads already exist in Life Log; a new
+row should reference them instead of copying every sensory transcript. A
+new database is a proposed storage boundary, not a requirement to duplicate
+facts. Store only what its service owns. If the project adopts the suggested
+r2_experiences.db, integrate its migration and optional availability with
+R2's initialized database-set logic; do not modify the existing five-store
+contract casually or force a new installation to overwrite any old files.
+A cross-file reference cannot rely on an ordinary SQLite foreign key to
+another database. Validate it through an explicit interface and maintain a
+repairable index of verified relationships.
+
+A person might experience a warm, breezy afternoon as comfortable and later
+remember liking such weather. In our implementation, a temperature report,
+wind report, body pose and elapsed time would first be observations. An
+appraisal of comfort would be a generated or derived interpretation of
+that evidence, not a guaranteed sensory feeling. A diary could use it to
+propose a contextual preference, then compare later experiences before
+raising confidence. A different day may be warm and unpleasant because of
+humidity, direct sunlight or fatigue. The original episode remains valid;
+the generalized belief should become more specific rather than erasing the
+contradictory case. An episode can also remain unappraised until there is
+sufficient evidence or a meaningful reason to revisit it.
+
+Experiences must not become omniscient or create retrospective accounts
+of events during downtime. A sensor event can be unavailable; an action can
+be unconfirmed; a prior episode can be only partially known. Represent
+these honestly. Preserve an explicit origin such as observed, reported,
+derived, recalled, inferred, hypothetical or unknown. These categories are
+not interchangeable. A conversation partner's report about an event is
+not R2's direct observation of it. A remembered location is not evidence
+of its present state. A diary statement is not proof that its described
+external event took place. A new memory must retain that distinction.
+
+08. ENCODING, CONSOLIDATION, REPLAY AND THE DIARY
+------------------------------------------------
+Neural memory representations can be reactivated and can change; research
+on engrams includes questions of stability, updating, reconsolidation,
+forgetting and schema formation [23]. Human memory is reconstructive, and
+source monitoring helps explain why inferred or imagined information can
+sometimes be misattributed to real events [24]. For software we should not
+reproduce unreliable reconstruction merely because humans have it. We can
+retain exact source provenance while modeling flexible retrieval and
+interpretation. The original observation is an immutable historical claim
+subject to explicit correction and deletion; a later inference can be
+superseded without rewriting the original claim.
+
+Sleep research supports active memory consolidation involving replay and
+coordination across hippocampal, thalamic and cortical activity [25,26].
+There are continuing debates about which mechanisms matter under different
+conditions, how details are preserved and how memories are transformed.
+R2 need not run a biological slow-wave sleep simulation. The useful
+computational distinction is between live event capture and a slower
+background process that can integrate, compare and generalize past events.
+Offline replay here means reading recorded evidence, not pretending that
+the robot has re-experienced the original event. During actual downtime,
+no inference should be credited as a completed reflection.
+
+Suggested consolidation procedure:
+  1. Select a modest number of unprocessed or relevant experiences, including
+     counterexamples and a sample of older related episodes. Preserve exact
+     identities and the version of the retrieval set.
+  2. Build a working context containing the selected original evidence,
+     current beliefs, uncertainty and a clearly defined question. Never
+     silently clip an original event and label the fragment complete.
+  3. Ask the reflection process to propose patterns, open questions,
+     alternative explanations or candidate memories, not to assume a
+     prescribed emotion or reach a predetermined conclusion.
+  4. Validate the output against the evidence IDs, record the appraisal and
+     the proposed memory as distinct artifacts, and label speculative claims.
+  5. Commit accepted results once. Link the diary entry, Life Log event,
+     experience and memory rather than creating several identical rows.
+  6. Reopen beliefs when new independent evidence contradicts them. Retain
+     revision history, and avoid treating repetitions of a derived claim
+     as independent corroboration of the claim.
+
+Research on the default mode network emphasizes internally oriented
+thought as well as the integration of ongoing inputs with past knowledge
+and social context [27]. This is a useful inspiration for R2's existing
+reflection cycle. A diary can combine present world state and prior
+experience to explore why an action mattered, what changed, and what might
+be worth investigating next. The current project already has reflection
+and private diary mechanisms. Extend their evidence sources instead of
+creating a new isolated dreaming process. Avoid a requirement that every
+entry be profound. A useful reflection could simply record a new association
+or acknowledge a failed prediction. Keep a distinction between generated
+fiction in a dream and later evidence about the real or simulated world.
+
+Metacognition research distinguishes performance itself from estimates of
+performance and confidence [28]. This suggests that an R2 model's confident
+wording should not itself be the confidence metric. Evaluate confidence
+against outcomes over repeated held-out tasks; record whether a claim was
+corrected and whether the evidence actually supported it. A useful
+metacognitive task is to ask whether an object-location belief is current,
+old, inferred or directly verified. If its claimed confidence is high but
+its predictions frequently fail, adjust the estimator or retrieval method.
+Do not teach the system to hide uncertainty by merely sounding certain.
+
+Consolidation must also have a stopping condition. A new memory derived
+from a diary should not cause another automatic diary entry that generates
+another paraphrase of the same memory indefinitely. Keep a lineage graph;
+select original evidence or genuinely new observations when reconsolidating.
+Use a unique consolidation key over operation type, evidence set and
+revision. Permit intentional reanalysis with a new version or changed
+question, but label its relation to the previous result. A hundred copies
+of a memory are not a hundred independent experiences. This is one of the
+highest-value invariants in the whole system.
+
+09. APPRAISAL, REWARD, HABITS AND CHOICE
+----------------------------------------
+Neuroscience does not divide the brain neatly into an emotional subsystem
+and a purely rational one. Large-scale networks integrate affective and
+cognitive influences [29]. Reward is also not a single pleasure number:
+research distinguishes hedonic responses, motivational attraction and
+learning [30]. Dopamine activity in some circuits reflects differences
+between expected and obtained outcomes, among other functions [31,33].
+Goal-directed actions and habits involve interacting corticostriatal
+circuits and can be studied by changing the value or contingency of the
+outcome [32]. Avoid equating dopamine with enjoyment or classifying every
+repeat behavior as an addiction. These are biologically oversimplified
+claims and would produce bad software.
+
+R2's existing Reward and Addiction mechanisms already provide a place for
+reinforcement and behavior-derived patterns. Preserve the existing bounded
+reward rules and the requirement for repeated voluntary choices across
+time. Experiences can help distinguish a chosen activity, its expected
+outcome, what happened, a retrospective appraisal and subsequent decisions.
+The same episode may be rewarding, aversive, neutral or mixed. A book can
+be difficult yet satisfying; an activity can be wanted before it begins
+but disappointing after completion. Do not collapse all these cases into
+one numerical value. A value representation can be multi-dimensional:
+modeled liking, predicted usefulness, effort, novelty, comfort, goal
+progress and uncertainty. These are software variables, not measured
+neurochemistry. Let the existing reinforcement ledger own its scores.
+
+An engineering experiment, only after the existing ledger is stable:
+compare predicted outcome value V(s,a) with a measured task outcome r.
+A simple bounded estimate update might use V_new = V_old + alpha*(r-V_old),
+where alpha is a small, validated learning rate. For temporally extended
+tasks, store action context and a stable operation identity and associate
+later feedback with the proper outcome. This is a computational learning
+analogy, not a model of all dopamine neurons. The evaluation r must have a
+clear definition, and any reinforcement must comply with the existing
+Reward contract. Never let the model freely invent scores, reinforce a
+planned but unexecuted action, or count the same outcome again during
+recovery. The existing reward mechanism may already be sufficient; compare
+before adding a second one.
+
+A habit candidate should depend on repeated actual choices in comparable
+contexts. A preference can be strong without being a habit, and a habit can
+persist despite changing preferences. A scripted action is not a voluntary
+choice. Automatic thermostat control, loading a saved position, or retrying
+an event delivery should never count as a repeated preference. In particular,
+reserve any addiction-related terminology for the existing software's
+specific, observable definition; it is not a clinical diagnosis or an
+authorization to optimize compulsive activity. Support stopping an activity,
+changing a plan, and responding to alternative goals. The system should not
+learn to seek maximum reward at the expense of its owner's controls or
+established constraints.
+
+Choice Lab should combine feasibility from the world, internal needs from
+Reality, estimates from learning, current commitments, and optional
+curiosity or exploration. Use explicit eligibility and expected outcomes;
+a high-scoring impossible action is still impossible. Introduce new choice
+signals as features, not unbounded mandates. Where a deterministic planner
+can execute a known route, it should not require a language model for each
+step. Where the model proposes an unfamiliar task, validate its intended
+operation with actual available capabilities. Plans, choices and completed
+outcomes should be linkable by identity. Record why a choice was unavailable
+rather than inventing a successful alternative.
+
+Potential tests: offer two feasible activities with different learned
+outcomes, then make the previously favored option unavailable or less
+useful. Verify that a context-sensitive planner can reconsider, and that
+repeated reminders or replayed events do not increase habit counts. Try a
+neutral activity and a disappointing outcome and confirm that neither
+necessarily creates positive reinforcement. Test reward delivery failures
+between the world commit and the Life Log update. A restart should complete
+undelivered records once, not re-run the physical action.
+
+10. LANGUAGE, IMAGINATION, LEARNING AND DEVELOPMENT
+---------------------------------------------------
+There is evidence that linguistic processing is dissociable from several
+forms of nonlinguistic reasoning, although the relationship between language
+and thought is complex [34]. The practical conclusion is that R2 should
+be able to perform some useful operations without first generating a verbal
+narrative. Local geometry, temporal state, contact, action controllers and
+retrieval indexes can provide computational capabilities in their own right.
+The language model can interpret, plan, explain, relate evidence and produce
+new candidate abstractions. It should not need to substitute for physics,
+a transaction database, or a real vision frame.
+
+Separate a hypothesis from action. AlternateSelf and Imagination can model
+possibilities: what if a book were on the other shelf, or what if a recipe
+used a different ingredient? A hypothetical outcome can support a choice
+without being saved as a real experience. If an experiment is later carried
+out, link the observed outcome to the hypothesis and evaluate the prediction.
+Do not change the world by merely simulating it inside a language prompt.
+Likewise, an existing memory that describes a future intention should not
+be treated as an executed action. Intentions belong to a task or prospective
+memory record and can be canceled or fulfilled.
+
+Human learning is shaped by both common developmental inputs and the
+particular experiences an individual encounters; plasticity continues
+through life [35]. R2 has a planned School Update and reading environment.
+A useful analogy is a developmental curriculum in which learning builds on
+existing capabilities, not an imposed fictional age or guaranteed trajectory.
+Track what R2 can demonstrate, which concepts it encountered, where it is
+uncertain, and what it can transfer to a different problem. Reading a book
+is not the same as understanding it. Retaining a fact from one page is not
+proof of mastering a subject. Assess comprehension using varied tasks,
+including ones whose answer is not present in the last page or prompt.
+A skill should improve through measured performance rather than a decorative
+experience counter.
+
+Research on curiosity suggests that motivation to acquire information can
+interact with memory formation [36]. A future curiosity component could
+prioritize useful unresolved questions based on evidence gaps, rather than
+rewarding endless exploration for its own sake. For example, if a reader
+encounters an unfamiliar word, it can consult available learning resources,
+record the explanation and later test its understanding. The activity must
+remain within authorized local resources; an unknown is not permission to
+seek private data or access new networks. Curiosity should not be used to
+pressure the owner for continuous interaction. The system should be able
+to learn independently while the owner is absent, or remain inactive.
+
+The proposed school, food, media, game, reading and electronics capabilities
+can all share the same Experiences interface. The actual activities should
+be implemented through their existing domain services. Reading progression
+needs real page content, not an arbitrary increment of a stored integer.
+Media events should distinguish playing a video from R2 attending to it.
+Game performance should be linked to actual verified game state. The Food
+Update should allow ingredient-level preparation, modification and later
+recreation, while preserving inventory identity and existing Reality
+transactions. A phone added through Store Items Overhaul should remain a
+functional physical device, connected only through authorized communication
+channels and subject to the same state ownership principles.
+
+11. A CONCRETE INTEGRATION CONTRACT WITH CURRENT R2
+--------------------------------------------------
+Do not begin by replacing the existing R2 core. The inspected development
+snapshot was Xylin48/R2-3PO at 3d1052114e807a965509a22f8467b6b103a0e896,
+then the head of open PR #194. Its official main branch was older. Verify
+the latest deployment candidate and active branch before doing any work.
+The relevant existing interfaces I inspected include:
+
+  Reality.h: persistent self and world continuity, item/container operations,
+  transitions, food consumption and appraisal by experience ID, money and
+  CRT/VCR state. Existing food experience IDs are domain identities; do not
+  assume that they are globally unique or equivalent to the proposed global
+  experience ID. A typed link can connect them.
+
+  Reality.c: bridge_event connects factual logging to Life Log and optional
+  memory. Location delivery has a persisted pending-delivery path. Actual
+  food consumption updates the modeled body and informs reward and repeated
+  behavior evaluation. Preserve the authoritative domain operation and its
+  existing consumers. Do not repeat it from an Experiences subscriber.
+
+  Eyes.h / Ears.h: raw sensory acquisition with source metadata, formats,
+  timestamps and explicit lifecycle. Eyes frame pointers can be invalidated
+  by capture or close, so a cross-thread consumer needs a valid copied frame
+  under the appropriate source ownership contract. Do not publish a pointer
+  across a process boundary or label virtual frames as physical camera data.
+
+  Visual.c: selected image interpretation, persistence and shared sensory
+  logging. Preserve the source and original event when adding virtual frames.
+  An existing source failure must not be masked by fabricated world evidence.
+
+  Log.h / Log.c: stable event identities, linked evidence, committed sensory
+  and thinking records, conversation and reflection replay, Hands outcomes.
+  The code already indexes certain categories after an original Life Log
+  event commits. This is a valuable established pattern, not a guarantee
+  that every possible event has already been indexed.
+
+  SensoryJournal.h: references original Life Log IDs, associates diary and
+  reflection rows, supports search. Use this existing index rather than
+  creating a separate copy of every observation in Experiences.
+
+  Reward.h / Addiction.h: bounded reinforcement and behavior-derived
+  preference or habit assessment. There are idempotent reward operations
+  and reconnect functions; verify the exact semantics and key construction
+  before binding new callers. Preserve existing voluntary-choice criteria.
+
+  r2_diary.h: staged reflections with exact evidence IDs, durable diary
+  identities and mirror replay. Extend its evidence selection and link
+  types carefully. Private diary content must not automatically become
+  public logs or outgoing communications.
+
+  r2.c: reasoning and reflection context combines existing subsystems;
+  initialization replays historical records and checks a persisted database
+  set. Hands, Eyes/Ears and Watch have their own lifecycle constraints.
+  The active conversation path has historically been sensitive to context
+  size and follow-up continuity; virtual-world context must not regress it.
+
+  AlternateSelf.h: hypothetical branches are explicitly distinguished from
+  factual memory. Preserve that boundary when a prediction is evaluated.
+
+The architectural rule is one owner for each mutable field or domain
+transaction, even when that owner is connected to many other consumers.
+The following proposed responsibility split is deliberately more specific
+than the user's conceptual diagram. It must still be reconciled with
+existing storage and APIs before any implementation:
+
+  Living Colors engine: physical geometry, colliders, simulation pose,
+  contact, world rendering, physical positions of registered object
+  instances, time-varying environmental fields and motion outcomes.
+
+  Reality: modeled needs, ownership and inventory domain transactions,
+  existing money/fridge/television/VCR semantics, room-level state and
+  the interpretation of domain effects. The engine may project this state
+  but not autonomously invent transactions or maintain a rival ledger.
+
+  Spatial adapter: coordinates, body posture, movement requests and results,
+  learned map queries and translation between existing room names and
+  geometric locations. Location evidence updates the existing room-state
+  model only after a genuine transition. It should not generate a separate
+  Life Log event when an equivalent one already exists.
+
+  Hands adapter: high-level manipulation requests, reach/contact validation,
+  exclusive object location transitions and confirmed results. The existing
+  Hands tool interface must remain operational. Physical/virtual actions
+  must be distinguishable and require the appropriate capabilities.
+
+  Eyes/Ears adapters: borrowed or copied frame/audio data, exact source
+  identity and synchronized timing, selected by existing source ownership
+  rules. Renderer state is not substituted for a sensory observation.
+
+  Experiences: episode grouping, provenance links and interpretations,
+  with verified connections to factual events, not mutation of world state.
+
+  Existing memory/diary/learning services: their original responsibilities,
+  augmented by the new evidence types and retrieval interfaces. Preserve
+  their independent behavior when Living Colors and Experiences are absent.
+
+There is a distinction between the physical state and the conceptual/domain
+state of an object. For a CRT, Living Colors can own where it is placed and
+its geometric screen; Reality already owns the power and input semantics.
+The renderer requests the current device state and represents it. A hand
+pressing the power button requests a domain action, which commits through
+Reality and then updates the representation. A failed transaction leaves
+the TV's state unchanged and reports why. Do not allow the visual object to
+show powered on while Reality records powered off except during an explicit,
+transient animation with a clearly defined authoritative state.
+
+For groceries, ownership and availability cannot be delegated to an
+independent storefront simulation with duplicate balances. The user named
+r2store as the existing grocery foundation to reuse when that work begins.
+Inspect its actual contract before designing the adapter. Merchandise,
+price, transaction identity, ownership and placement must be consistent.
+A purchase that has been charged but not yet physically placed needs a
+persisted pending-delivery state, not another charge or another object.
+The house comes first; do not let this future integration derail the core.
+
+The Living Colors standalone viewer is a test client. It should use the
+same physical commands and state that R2 uses. Keyboard and mouse inputs
+are optional human inspection mechanisms and must never be required for
+R2 to move, see, interact or persist state. A proposed local IPC boundary
+can provide process isolation, rendering independence and versioned
+messages. A native library with well-defined ABI could also work; neither
+choice is yet proven optimal. Do not declare an IPC protocol finalized
+until message framing, sizes, lifecycle, permissions, cancellation, error
+handling, resource ownership and crash/reconnect behavior are tested.
+Keep the core testable without a renderer, model or physical peripherals.
+
+12. PERSISTENCE, SCHEMAS, TRANSACTIONS AND DELIVERY
+-------------------------------------------------
+A connected ecosystem must remain correct across restarts. The most subtle
+failure is not necessarily a crash; it can be a successful operation that
+quietly leaves two persistent stores disagreeing. R2's existing patterns of
+pending location delivery and reconnecting historical records show that the
+project already recognizes this problem. Extend those patterns rather than
+assuming a process-local callback guarantees consistency.
+
+Proposed event envelope, using language-neutral fields (not a wire format):
+
+  protocol_version          event schema and compatibility contract
+  event_id                  immutable identity of the original occurrence
+  producer_id               persistent source identity and instance
+  kind                      typed observation/transition/outcome
+  occurred_at               original time, clock domain, uncertainty if any
+  emitted_at                actual publication time
+  world_revision            relevant committed physical state revision
+  cause_event_id            direct preceding cause, if known
+  correlation_id            task or situation relationship
+  payload_schema            schema identity and version
+  payload                   bounded, typed data or evidence references
+  evidence_origin           observed, reported, inferred, etc.
+
+Use an identifier that survives process restart and is not reused. A local
+SQLite row ID is only unique in its own store; a composite identity with a
+stable producer or a durable globally unique ID avoids collisions. Do not
+use timestamps alone as identifiers. Ensure new optional fields have
+explicit defaults or unknown values; unknown must not be conflated with
+zero, false or empty. A newer service should reject unsupported semantics
+rather than silently misinterpret the data, while older clients retain
+known behavior. A compatibility handshake can negotiate capabilities
+before a command is issued.
+
+For important cross-service actions, consider a durable outbox in the same
+transaction as the owner mutation. The owner writes the state change and
+its publication record atomically. A consumer reads an event, checks its
+stable delivery key, applies its own local change and records the receipt
+in the same local transaction. Delivery may be retried; the effect must
+remain unique. If both stores use SQLite, do not assume two unrelated
+connection commits can be atomic. A cross-store workflow can represent
+pending and committed phases explicitly. Recovery must resume the correct
+phase, not blindly repeat the original action. If an external operation
+cannot be proven complete, record the outcome as unknown and reconcile
+through its own supported status mechanism.
+
+A simple invariant: every physical object instance has at most one current
+location or container. Ownership identity remains stable when an object is
+moved, held, stored or used. Existing inventory might track quantities
+rather than individual units; migration to instance IDs should preserve
+counts and attributes and not duplicate or discard possessions. A movable
+book needs an instance identity distinct from its title or file path;
+multiple copies may share content. A food ingredient may be divided or
+combined through an explicit domain transaction, with the resulting
+quantities and identities accounted for. Preserve reading position, power,
+open/closed state and other mutable attributes for each object, not merely
+its template. An unknown or missing physical representation is not proof
+that the logical item was consumed.
+
+For world actions such as opening a door, treat the state change and its
+physical geometry as one logical operation. Collision and rendered shape
+should derive from the same door state and transform. A door cannot close
+through an occupied space without defined collision behavior. An object
+picked up from a table should not remain there as a solid collider. If the
+simulation restarts mid-action, store sufficient action state to resume or
+resolve the action consistently. An interrupted walk should leave the actor
+at the last committed valid position, not the final goal. No save file should
+allow impossible coordinates to become a new factual experience.
+
+An additive migration plan must be explicit:
+  * Inventory and back up old schema versions and representative records.
+  * Define which service owns each field and how a legacy row maps to a new
+    entity or remains unchanged. Avoid unnecessary rewrites of large tables.
+  * Run migration inside suitable transactions, record version only after
+    success, and test interrupted migration and repeated startup.
+  * Verify historical counts, exact IDs, source relationships, settings,
+    possessions and existing data retrieval before enabling a new provider.
+  * For an older build, support its established data path or clearly document
+    the rollback boundary. Never claim compatibility that was not tested.
+  * Offer operator-controlled export, retention and deletion. A continuity
+    model must respect deliberate user data removal, including derived
+    records and links where required; do not secretly reconstruct removed
+    information from duplicates or stale indexes.
+
+Do not confuse replay of pending delivery with a new experience. A database
+retry, process restart or source reconnection is a technical event. It can
+be logged as such, but is not another meal, voluntary decision, view of a
+room, or reward. Conversely, two genuinely distinct visits to the same desk
+must retain two different event identities even if their text is identical.
+This distinction is crucial for learning from repeated experience.
+
+13. A WORKED SEQUENCE IN THE HOUSE AND OUTSIDE IT
+------------------------------------------------
+The following is an illustrative test narrative, not a record of behavior
+that has already occurred. It describes the user's desired future system in
+terms of explicit evidence and state transitions.
+
+08:20: R2 begins in the living room. His current persisted pose is restored
+from the engine. His old memory says that a reader was on the school desk
+last evening. That is a prior belief, not a live observation. Reality's
+modeled state indicates ordinary morning needs. He considers reading; the
+choice process may select it, postpone it or choose another feasible action.
+The scenario assumes he selects it for the purpose of testing.
+
+08:21: Spatial receives a goal to reach the upstairs desk. It finds a route
+through the known living room and staircase, executing timed movement
+commands rather than changing the final coordinates instantaneously. Eyes
+can receive frames as the view changes. A previously open bedroom door is
+now closed; the engine collision rejects forward movement. The action
+result and current observed door state are recorded. R2 revises his plan,
+requests an opening action within reach and observes the actual open state
+before proceeding. There is no need for separate model inference on every
+step or every rendered frame.
+
+08:22: He observes the desk, but the reader is not visible. The belief that
+it is there becomes uncertain. The scene graph may know its true location,
+but the model is not told the hidden answer. He chooses to inspect the
+shelf. An actual frame and perhaps a permitted near-field contact query
+confirm the reader. A new belief records the observed shelf location and
+links it to the old desk memory. Both historical observations remain true
+for their own times. The shelf observation must not overwrite the earlier
+record or generate the fiction that the reader was always on the shelf.
+
+08:23: Hands requests retrieval. If the operation succeeds, the object
+moves from shelf to grasped state with the same instance ID, and the old
+shelf representation no longer contains the item. Sitting at the desk
+changes the simulated body pose and camera position. The reading subsystem
+provides real page content and updates progress under a documented action
+contract. It is not sufficient to turn a counter from 6 to 7 without any
+content access. A page's text may be delivered through a distinct reading
+interface while its physical appearance remains visible to Eyes.
+
+08:30: The owner starts a conversation. The ongoing reading task pauses at
+its saved page, without deleting the book or claiming it was finished. The
+chat enters through the existing conversation path with the original source
+identity and complete current user message. A short, relevant world summary
+can inform the answer but cannot evict the immediately preceding exchange.
+The conversation forms its own experience and may be associated with the
+reading episode without collapsing their distinct sources.
+
+08:37: R2 returns to reading or chooses a different activity. In the former
+case, the task resumes from the committed checkpoint; in the latter, its
+abandonment is a valid outcome. Life Log records the meaningful actions,
+Sensory Journal links actual observations, and Experiences groups the book
+search and reading session. A later appraisal may say the reading was
+interesting but difficult. That statement belongs to the appraisal, not
+as an objective measurement of the book's inherent quality. Reward and
+habit assessment use their existing rules and do not automatically grant
+points for merely reading an appraisal or reaching a particular page.
+
+Later, after outdoor infrastructure exists: R2 sits in the yard. The engine
+reports the simulated temperature, airflow, illumination and exposure.
+His body is stationary, and the environmental state changes over time. A
+small number of meaningful observations is retained. An appraisal might
+associate comfortable conditions with a gentle breeze. It may instead
+remain neutral. This is not a guaranteed reaction hardcoded into the
+weather system. When future episodes differ, the learning process may
+infer that shade matters, or that breeze matters only in warm weather.
+A candidate preference then influences later choices in similar settings.
+Each observation, appraisal and learned generalization retains separate
+identities. No real-world weather claim should be made from simulated data.
+
+During reflection: the diary process retrieves the original book episode,
+the conversation and selected environmental records if relevant. It may
+compare the failed expectation about the reader with the successful search,
+or develop an association about where it tends to be comfortable. A new
+memory can reference the original evidence and diary entry. The model's
+output is not an additional independent observation of the same afternoon.
+If later corrected, the generalized memory is revised, not silently erased.
+The cycle ends not by destroying anything but by returning new information
+to the next decision. This is what the user's closed compound metaphor
+means operationally: successive, evidence-linked cycles of action,
+perception, memory, reflection and renewed action.
+
+14. ENGINEERING BUDGETS AND THE EXPERIMENT PROGRAM
+-------------------------------------------------
+The user intends to run R2 on modest local hardware. Prior project context
+identified an i5-3470, about 15 GiB RAM and a GTX 1050 Ti, with separate text
+and vision models under consideration or already integrated in different
+branches. Verify the actual host and model settings when needed. The
+Living Colors design target is a low-overhead, late-1990s-style procedural
+world, a 640x480 reference frame and minimal dependence on external assets.
+Do not claim measured memory, CPU or GPU figures until benchmarked.
+
+Architecture should work at different update timescales:
+  * Physics and camera controls: regular, bounded local steps as needed.
+  * Rendering: active when observing or inspecting, not an obligation to
+    redraw unchanged frames forever.
+  * Sensory ingestion: source-specific cadence with bounded buffers;
+    significance and relevance determine what merits durable storage.
+  * Action planning: at task boundaries or when current assumptions fail.
+  * Episode formation: on meaningful events and transitions, not each pixel.
+  * Reflection and consolidation: scheduled or idle-time work within an
+    inference budget, not a competitor that indefinitely blocks live chat.
+
+The exact rates are proposed engineering parameters, not biological facts.
+A useful benchmark should measure frame generation latency, world-step
+latency, peak and steady RAM, VRAM when rendering, idle CPU, database growth,
+queue depths, dropped frames, inference wait times, time to shut down,
+recovery duration and effect on conversation response latency. Compare with
+R2's baseline without Living Colors and with the engine active but no model
+requests. Measure the actual host when the code is ready and the user
+approves a live test. Use deterministic headless scenarios first. A single
+successful run cannot establish correctness over all interleavings.
+
+Experiment matrix for future development:
+
+E01 - Physical correctness. Verify both floors, stairs in both directions,
+      closed/open door collision, reachable surfaces, occlusion, no movement
+      through solid furniture, valid landing geometry, seat eye height and
+      consistent render/physics transforms. Inspect the agreed floor plans;
+      no invented ranch layout, rearranged bedroom or new PC.
+
+E02 - Persistent continuity. Move one object, change door and device states,
+      save, restart and compare every authoritative field and instance ID.
+      Test invalid and older save data, interrupted write and failed load.
+      Confirm no old database or object disappears during upgrade.
+
+E03 - Evidence provenance. Supply a physical camera image, virtual frame,
+      user report, hypothetical description and an old memory with similar
+      content. Ask retrieval to identify which was observed, which was
+      reported and which was merely imagined. Preserve source and time.
+
+E04 - Perception/action loop. Move a book to an unexpected but accessible
+      location. The actor starts with an outdated belief, observes a failed
+      expectation, explores, updates the belief and retrieves the book.
+      Compare behavior with and without associative recall. Measure task
+      completion, number of inspections and false assertions.
+
+E05 - Episode formation. Generate overlapping reading, conversation and
+      movement events with meaningful boundaries. Verify distinct episodes,
+      correct shared evidence references and no duplicate original events.
+      Test missing end events, interrupted actions and recovery.
+
+E06 - Consolidation. Supply several independent episodes and one conflicting
+      example. Compare the ability to retrieve a particular event and form
+      a calibrated generalization before and after offline analysis. Retain
+      the counterexample and exact original evidence. Reject unsupported
+      or circular derivations. Test repeat runs for idempotency.
+
+E07 - Reinforcement. Compare predicted and actual neutral, useful and
+      disappointing outcomes. Verify that only a valid outcome can produce
+      reinforcement under the existing rules; retries cannot grant it twice.
+      A scripted routine cannot count as voluntary repetition. Test choice
+      adaptation after changing the value or availability of an activity.
+
+E08 - Metacognition. Test recognition of stale beliefs and uncertain sensory
+      interpretations. Evaluate confidence against verified outcomes, using
+      a separate test set. Compare calibration and decision correctness, not
+      merely how often the model says it is uncertain.
+
+E09 - Backwards compatibility. Run old conversation, diary, physical camera,
+      microphone, media, inventory and money paths with the new module absent
+      and present. Verify unchanged user-visible behavior where promised.
+      Repeat old save/database initialization and migration tests. Test first
+      message, follow-up, long context, replay and exact memory attribution.
+
+E10 - Failure and concurrency. Crash a test process immediately before and
+      after each owner commit, publication, consumer application and receipt.
+      Reconnect with a stale client; cancel a task mid-move; change the source
+      while a vision request is running. Verify durable state and no duplicate
+      rewards or observations. Test orderly shutdown and explicit disconnect.
+
+E11 - Resource use. Benchmark renderer absent, idle and active; simultaneous
+      conversation and world operation; and bounded reflection work. Measure
+      regressions against the native core without the new modules. Verify
+      that input and shutdown remain responsive under contention.
+
+E12 - Controlled external interfaces. Verify that optional Android or other
+      authorized connections do not change default offline behavior. Test
+      disabled network, loss of connection, correct source attribution and
+      local access controls. No general-purpose external access is required
+      for autonomous operation in the house. Preserve operator control.
+
+Each experiment needs reproducible fixtures, expected assertions, a test
+log and a documented environment. Tests should exercise direct causes of
+failures rather than a recovery phrase that conceals the problem. Do not
+silently discard a result or claim a feature works just because a wrapper
+reported success. A passing simulation is not proof of correct live hardware
+operation; report precisely what was exercised. Add negative tests as well
+as positive ones. Test the system's ability to avoid unsupported factual
+claims, not its ability to mimic persuasive human language.
+
+15. SECOND-PASS CRITIQUE AND REVISED RECOMMENDATIONS
+---------------------------------------------------
+Having now written the proposed architecture, I want to address the parts
+most likely to mislead a future developer. The act of writing this letter
+has produced several attractive ideas. Attraction is not evidence of their
+necessity, and a project of this scale can fail from adding too much rather
+than from having too few ideas.
+
+First, the brain analogy risks multiplying databases and modules in a way
+that bears little resemblance to the integrated biological system it seeks
+to emulate. I originally considered assigning a separate subsystem to each
+cognitive function. On review, that would produce excessive overlap. The
+better principle is separate ownership where state semantics differ, not
+separate software for every anatomical term. Make Experiences a global
+capability, but start with the smallest reliable representation that links
+real events to episodes and versioned appraisals. Use the existing Life Log,
+Sensory Journal, diary and reward ledgers for the work they already perform.
+A new subsystem earns its existence by solving a real missing capability.
+
+Second, an apparently unified state can destroy an important epistemic
+boundary. The environment engine knows exactly where an object is; an actor
+who has not observed it should not. Giving the model the entire scene graph
+would make navigation easier in a test yet defeat the user's intent to give
+R2 actual perception and learned familiarity. Therefore keep two interfaces:
+a privileged engineering/state interface for consistency and a situated
+sensory interface for R2's cognitive observations. A task controller can
+use collision geometry to avoid violating physics without returning hidden
+object names or destinations as knowledge. Distinguish internal body pose,
+known routes and task goals from unknown surroundings.
+
+Third, 'every object remembers state' should not result in each object
+holding a disconnected mini-database. Persistent identity and state are
+valuable, but they should have a common lifecycle and transaction model.
+Store state where the relevant domain owns it and use references in other
+services. An electronic device's screen, power, media position and ownership
+may be related but not necessarily owned by the same module. Synchronize
+through a defined contract; make any transient state explicit.
+
+Fourth, human memory has errors, interference, forgetting and reconstruction.
+We can learn from the way it generalizes without deliberately losing reliable
+source data. Retain raw evidence where appropriate, allow interpretation to
+change, and make retrieval priority adjustable. Do not make the architecture
+an irreversible accumulation of all information. Real privacy, storage and
+operator controls matter. The project's additive rule is about preserving
+working functionality and continuity, not preventing correction, removal or
+ordinary management of data. An owner should always be able to stop the
+system and change its configuration.
+
+Fifth, reward optimization is not equivalent to healthy learning. A numerical
+incentive can dominate choices if implemented poorly, and no user wants a
+system that repeatedly performs one trivial action solely to maximize a
+score. Instead, test whether R2 can make varied, context-sensitive choices,
+adapt when outcomes change and retain the ability to defer, stop or choose
+nothing. The neuroscience distinction among liking, motivation and learning
+is especially useful here. Preserve the existing bounded reward mechanisms,
+and do not introduce unbounded drives or treat every interest as addiction.
+
+Sixth, an elaborate autonomous planning service could worsen the existing
+conversation problem. Shared memory and context have historically been
+sensitive to exact allocation and follow-up continuity. The new world must
+not dump an enormous state summary into every inference request or cause an
+active conversation to wait behind background reflection. Use relevance-
+selected records, measured budgets, correct buffer sizing and actual
+completion/cancellation semantics. Preserve the complete current message
+and the preceding exchange where the existing contract requires them.
+Never silently remove evidence to make an allocation succeed. If the data
+cannot fit, handle that as an explicit architectural constraint, not a
+fictional or generic model reply.
+
+Seventh, the distinction between the model and the mind-like architecture
+is not an argument for removing the model. The language and vision models
+can be excellent at their specialized tasks, while the world and learning
+infrastructure supply continuity and nonlinguistic computation. Use the
+right mechanism for the job. An LLM should not calculate every collision,
+and a geometry engine should not be tasked with interpreting a poem.
+Do not change model selection merely because this memorandum discusses a
+new cognitive function; inspect the user's existing model integration.
+
+Eighth, the analogy to sleep and diary reflection should not create a
+fiction that simulated hours of rest have actually run complex inference.
+A background consolidation job has a real start, end and result; simulated
+sleep is a modeled state. They can be related by policy, but one does not
+prove the other. This separation also makes deterministic testing possible.
+
+Ninth, a diagram of circles is not a dependency diagram. Initialization,
+shutdown and concurrency cannot be a circular chain of required calls.
+Use directional dependency interfaces, explicit state ownership and event
+subscriptions. Then permit information to travel recursively over successive
+committed events without an unbounded recursive stack. A cycle can be
+completed even if some participants are optional, provided the remaining
+system behaves truthfully and records unavailable capabilities correctly.
+
+Tenth, the project is not a neuroscience experiment on a human participant.
+Its results can show software behaviors under controlled conditions, not
+establish that a brain-like subjective experience exists. Avoid making
+unsupported claims about consciousness, feelings, developmental equivalence
+or moral status. If a future implementation produces a convincing diary
+entry, inspect the evidence and mechanisms that generated it. That is the
+scientific standard I want us to retain.
+
+These criticisms lead to a revised implementation order. Do not start with
+an elaborate reward-learning network, invented neurotransmitter values, or
+a universal event service. Start with an embodied, consistent house and a
+small contract connecting one verified event through the existing R2 chain.
+Then extend episode grouping and retrieval. Build a demonstrable example of
+one experience leading to a new evidence-linked memory and a changed future
+choice. Only after that works should we scale to complex multimodal binding,
+context-sensitive appraisal, learned navigation, curiosity and more advanced
+consolidation. The broad architectural goal remains intact, but the next
+implementation step is smaller and more rigorous.
+
+16. IMPLEMENTATION PRIORITIES AND ACCEPTANCE CRITERIA
+-----------------------------------------------------
+The user's immediate priority is Living Colors, specifically the house.
+Maintain that priority even if this research inspires several other updates.
+Development can opportunistically complete adjacent features when doing so
+is sensible, but must not change the central scope without discussion.
+
+Phase A - Finish the independently testable physical house. Preserve the
+agreed two-story layout, bedroom furniture arrangement, linen closet with
+two entrances, upstairs bathroom, correctly aligned staircase, kitchen and
+dining space, living room and exterior doors. Establish the correct floor
+and landing geometry, use shared physical/render geometry, improve actual
+object manipulation, posture and persistent object state. Verify the viewer
+and headless tests. The outdoor world and separate stores can follow later.
+
+Phase B - Define the integration seam. Audit current R2 initialization,
+Reality, Eyes/Ears, Visual, Watch, Hands, Life Log and memory interfaces.
+Implement a versioned, optional adapter with explicit source and action
+identity. Exercise one actual world interaction end to end without breaking
+legacy paths. A visible object can be identified by a situated observation;
+a nearby valid manipulation can commit; a factual event can reach the
+existing log and be retrieved. If the adapter is absent, R2 retains all
+existing physical and conversational capabilities.
+
+Phase C - Introduce Experiences minimally. Add a durable episode identity,
+original event links, a versioned appraisal and search/retrieval interface.
+Connect non-world experiences too, so the subsystem is not accidentally
+bound to a particular virtual scene. Start with a limited number of known
+producers and add more through typed contracts. Test old databases, restart,
+idempotency and explicit data management. Do not force a new appraisal for
+every log row.
+
+Phase D - Connect reflection and learned memory. Retrieve selected episodes
+through the existing diary and reflection process. Persist a supported
+candidate memory with links to the original evidence. Verify a correction
+and an unrelated event, ensuring neither is lost or falsely corroborated.
+Preserve private diary boundaries. A new derived memory should be usable
+in the next relevant decision without circular duplication.
+
+Phase E - Integrate existing reward and habit evaluation. Use completed
+outcome identities and the established value rules. Distinguish voluntary,
+scripted and technical activity. Test a changed outcome or changed
+availability. Add new estimates only if they produce measurable improvement
+and do not overwrite the existing history.
+
+Phase F - Broaden situated cognition. Add learned spatial knowledge,
+multimodal association, meaningful environmental fields, posture/comfort,
+prospective tasks, skills, reading comprehension and appropriate curriculum
+interfaces. Expand the street and grocery/appliance stores; use r2store as
+specified where relevant after inspecting it. Implement phones with the
+appropriate electronics/Store Items Overhaul update, not as an unrelated
+network requirement of Living Colors. Preserve authorized user communication
+and local operation. Introduce future subsystems through the same contract.
+
+Release acceptance is not the number of subsystem names or the length of
+this memorandum. It is the evidence that the system's real functions work.
+Before calling a build ready, verify that the renderer, physical simulation,
+persistence, integration and backwards compatibility actually passed their
+specified tests. Record unresolved issues, untested hardware and any
+provisional decisions. Do not silently substitute the old design or pretend
+that a planned feature exists. The user has repeatedly emphasized exact code
+inspection and direct correction of causes. Honor that in the development
+process, without eliminating necessary validation or permission controls.
+
+17. RESEARCH REFERENCES AND CLOSING LETTER
+-------------------------------------------
+The following are the sources consulted for this memorandum. URLs point to
+academic publisher pages, stable identifiers, or open academic archives.
+Most source review was at abstract or accessible review-text level. The
+reference numbers are used in the sections above. Titles are supplied as
+bibliographic identifiers; the proposals and wording in this letter are
+original engineering synthesis. Verify details in full text if needed.
+
+[1] Bassett DS, Sporns O. Network neuroscience. Nature Neuroscience 20,
+    353-364 (2017). https://www.nature.com/articles/nn.4502
+[2] Purves D et al., eds. Neuroscience, 2nd ed. Synaptic Transmission
+    (2001). https://www.ncbi.nlm.nih.gov/books/NBK11001/
+[3] Magee JC, Grienberger C. Synaptic Plasticity Forms and Functions.
+    Annual Review of Neuroscience 43, 95-117 (2020).
+    https://doi.org/10.1146/annurev-neuro-090919-022842
+[4] Turrigiano G. Homeostatic Synaptic Plasticity: Local and Global
+    Mechanisms for Stabilizing Neuronal Function (2012).
+    https://doi.org/10.1101/cshperspect.a005736
+[5] (Re)building the nervous system: A review of neuron-glia interactions
+    from development to disease. https://pmc.ncbi.nlm.nih.gov/articles/PMC11649038/
+[6] Halassa MM, Kastner S. Thalamic functions in distributed cognitive
+    control. Nature Neuroscience 20, 1669-1679 (2017).
+    https://www.nature.com/articles/s41593-017-0020-1
+[7] Shepherd GMG, Yamawaki N. Untangling the cortico-thalamo-cortical loop:
+    cellular pieces of a knotty circuit puzzle. Nature Reviews Neuroscience
+    22, 389-406 (2021). https://doi.org/10.1038/s41583-021-00459-3
+[8] Flexible modularity in the human brain: How network architecture
+    reconfigures over time. https://pubmed.ncbi.nlm.nih.gov/42219135/
+[9] Noppeney U. Perceptual Inference, Learning, and Attention in a
+    Multisensory World. Annual Review of Neuroscience 44, 449-473 (2021).
+    https://doi.org/10.1146/annurev-neuro-100120-085519
+[10] Senkowski D, Engel AK. Multi-timescale neural dynamics for multisensory
+     integration. Nature Reviews Neuroscience 25, 625-642 (2024).
+     https://www.nature.com/articles/s41583-024-00845-7
+[11] Cooperative thalamocortical circuit mechanism for sensory prediction
+     errors. Nature (2024). https://www.nature.com/articles/s41586-024-07851-w
+[12] Evaluating the neurophysiological evidence for predictive processing as
+     a model of perception. https://doi.org/10.1111/nyas.14321
+[13] The cognitive map in humans: spatial navigation and beyond.
+     https://pubmed.ncbi.nlm.nih.gov/29073650/
+[14] Shadmehr R, Smith MA, Krakauer JW. Error Correction, Sensory Prediction,
+     and Adaptation in Motor Control. Annual Review of Neuroscience 33,
+     89-108 (2010). https://doi.org/10.1146/annurev-neuro-060909-153135
+[15] Nguyen KP, Person AL. Cerebellar circuit computations for predictive
+     motor control. Nature Reviews Neuroscience 26, 538-553 (2025).
+     https://www.nature.com/articles/s41583-025-00936-z
+[16] Interoception as modeling, allostasis as control.
+     https://pmc.ncbi.nlm.nih.gov/articles/PMC9270659/
+[17] The Cognitive Neuroscience of Working Memory.
+     https://doi.org/10.1146/ANNUREV-PSYCH-010814-015031
+[18] Squire LR, Dede AJO. Conscious and unconscious memory systems (2015).
+     https://pubmed.ncbi.nlm.nih.gov/25731765/
+[19] McClelland JL, McNaughton BL, O'Reilly RC. Why there are complementary
+     learning systems in the hippocampus and neocortex (1995).
+     https://pubmed.ncbi.nlm.nih.gov/7624455/
+[20] Complementary Learning Systems. https://doi.org/10.1111/j.1551-6709.2011.01214.x
+[21] Josselyn SA, Frankland PW. Memory Allocation: Mechanisms and Function.
+     Annual Review of Neuroscience 41, 389-413 (2018).
+     https://doi.org/10.1146/annurev-neuro-080317-061956
+[22] Zacks JM. Event Perception and Memory. Annual Review of Psychology 71,
+     165-191 (2020). https://doi.org/10.1146/annurev-psych-010419-051101
+[23] Zaki Y, Cai DJ. Memory engram stability and flexibility.
+     Neuropsychopharmacology 50, 285-293 (2025; updated 2025).
+     https://www.nature.com/articles/s41386-024-01979-z
+[24] Johnson MK, Raye CL, Mitchell KJ, Ankudowich E. The cognitive
+     neuroscience of true and false memories (2012).
+     https://pubmed.ncbi.nlm.nih.gov/22303763/
+[25] Mechanisms of systems memory consolidation during sleep. Nature
+     Neuroscience (2019). https://www.nature.com/articles/s41593-019-0467-3
+[26] Sleep-A brain-state serving systems memory consolidation.
+     https://pubmed.ncbi.nlm.nih.gov/37023710/
+[27] Yeshurun Y, Nguyen M, Hasson U. The default mode network: where the
+     idiosyncratic self meets the shared social world. Nature Reviews
+     Neuroscience 22, 181-192 (2021).
+     https://www.nature.com/articles/s41583-020-00420-w
+[28] Fleming SM. Metacognition and Confidence: A Review and Synthesis.
+     https://pubmed.ncbi.nlm.nih.gov/37722748/
+[29] Pessoa L. A Network Model of the Emotional Brain. Trends in Cognitive
+     Sciences 21, 357-371 (2017). https://pubmed.ncbi.nlm.nih.gov/28363681/
+[30] Berridge KC et al. Dissecting components of reward: 'liking', 'wanting',
+     and learning. https://pmc.ncbi.nlm.nih.gov/articles/PMC2756052/
+[31] Schultz W. Dopamine reward prediction-error signalling: a two-component
+     response. Nature Reviews Neuroscience 17, 183-195 (2016).
+     https://www.nature.com/articles/nrn.2015.26
+[32] Balleine BW, O'Doherty JP. Human and Rodent Homologies in Action Control:
+     Corticostriatal Determinants of Goal-Directed and Habitual Action.
+     Neuropsychopharmacology 35, 48-69 (2010).
+     https://pmc.ncbi.nlm.nih.gov/articles/PMC3055420/
+[33] What Role Does Striatal Dopamine Play in Goal-directed Action?
+     https://www.sciencedirect.com/science/article/pii/S0306452224001337
+[34] Fedorenko E, Piantadosi ST, Gibson EAF. Language is primarily a tool for
+     communication rather than thought. Nature 630, 575-586 (2024).
+     https://doi.org/10.1038/s41586-024-07522-w
+[35] Early experience and brain development.
+     https://pmc.ncbi.nlm.nih.gov/articles/PMC8103659/
+[36] Curiosity and Learning. Cambridge Handbook of Motivation and Learning.
+     https://www.cambridge.org/core/books/abs/cambridge-handbook-of-motivation-and-learning/curiosity-and-learning/510E15AE21D67B8BBF962F35E32BC4B9
+
+Project reference (read-only inspection during preceding design discussion):
+    https://github.com/Xylin48/R2-3PO/tree/3d1052114e807a965509a22f8467b6b103a0e896
+    https://github.com/Xylin48/livingcolors/tree/dev/world-foundation
+The code state is time-dependent; verify the live repository before editing.
+This research letter is not an implementation commit or a test report.
+
+To close, I want to leave future development with a guiding question:
+when a new feature is added, what can R2 actually do or learn that he could
+not before, and can we follow the evidence from the beginning of that
+experience to its later influence on behavior? If the answer is simply that
+the model can describe the feature in fluent language, the feature is not
+finished. If the answer is that an action changes persistent state, produces
+an actual observation, can be remembered, can be reflected upon, and can
+inform a later choice without harming any existing capability, then the
+architecture is advancing in the direction the user described.
+
+Keep the house as the immediate world. Keep the original systems intact.
+Let each addition gain a meaningful place in the internal ecosystem. Learn
+from biological mechanisms, but test the engineering consequences. Never
+lose the distinction between what exists, what is observed, what is
+remembered, and what is inferred. That distinction is the foundation on
+which a useful long-lived cognitive architecture can be built.
+
+Respectfully submitted,
+The assistant working on R2-3PO and Living Colors
+25 November 2026
+=======================================================================
